@@ -1,7 +1,7 @@
 
-#include "graph.hh"
+#include "../src/graph.hh"
 #define NEED_GCC_NO_VARIADIC_WORKAOUND
-#include "graph_algorithms.hh"
+#include "../src/graph_algorithms.hh"
 
 #include <cassert>
 #include <boost/foreach.hpp>
