@@ -1,1 +1,11 @@
 Graph Template Library for c++
+
+The gtl library for c++ provides an STL-like container for graphs, 
+templated over the data stored at the vertices and the edges. Various types 
+of iterators are provided. The edges are directed and there are the
+possibility to permits parallel edges or not.
+
+This library was succesfully compiled with g++ ver. 4.3.2 with this cmd line
+options:
+
+> g++ -Wall -Wextra -pedantic -ggdb -std=c++0x graph_test.cc

@@ -5,27 +5,25 @@
 //    Description:  A template set of algorithms for graph classes
 //
 //         Author:  Michele Bertasi 
-//                  Giuseppe Di Guglielmo
-//        Contact:  giuseppe.diguglielmo@univr.it
-//                  michele.bertasi@studenti.univr.it
+//        Contact:  michele.bertasi@gmail.com
 //      Copyright:  Copyright (c) 2009, Giuseppe Di Guglielmo
 //        Company:  University of Verona - ESD Group
 //        License:  GNU Lesser General Public License (GNU LGPL)
 //
 //      Agreement:                
-//       This file is part of 'Phase 1'.
-//       'Phase 1' is free software: you can redistribute it and/or
+//       This file is part of 'GTL'.
+//       'GTL' is free software: you can redistribute it and/or
 //       modify it under the terms of the GNU Lesser General Public License 
 //       as published by the Free Software Foundation, either version 3 of 
 //       the License, or (at your option) any later version.
 //
-//       'Phase 1' is distributed in the hope that it will be useful,
+//       'GTL' is distributed in the hope that it will be useful,
 //       but WITHOUT ANY WARRANTY; without even the implied warranty of
 //       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //       GNU Lesser General Public License for more details.
 //
 //       You should have received a copy of the GNU Lesser General Public 
-//       License along with 'Phase 1'. 
+//       License along with 'GTL'. 
 //       If not, see <http://www.gnu.org/licenses/>.
 // 
 // =============================================================================
@@ -39,7 +37,12 @@
 #include <map>
 #include <limits>
 
-namespace utils {
+
+#ifdef NEED_GCC_NO_VARIADIC_WORKAOUND
+#pragma GCC system_header
+#endif
+
+namespace gtl {
 
 /// Base class for color maps
 /// @tparam _Color the type of the color
@@ -339,12 +342,8 @@ breadth_first_search (Graph& g, typename Graph::vertex_descriptor s)
 }
 
 
-#ifdef NEED_GCC_NO_VARIADIC_WORKAOUND
-#pragma GCC system_header
-#endif
-
-// ----------------------------- internals ------------------------------------
-namespace internals {
+// --------------------------------- impl --------------------------------------
+namespace impl {
 
 template <typename Graph, typename ... Other>
 class bfs_visitor_list;
@@ -425,7 +424,7 @@ struct bfs_visitor_list <Graph>
   : public bfs_visitor<Graph>
 {};
 
-} // namespace internals
+} // namespace impl
 
 
 /// This function allows to combine visitor togheter. The visitor returned 
@@ -434,11 +433,10 @@ struct bfs_visitor_list <Graph>
 /// every visitor of the list (V1::gray_target, V2::gray_target ..). Internally
 /// this visitor stores by value each visitor given. 
 template <typename V1, typename ... Other>
-inline internals::bfs_visitor_list<typename V1::Graph, V1, Other...>
+inline impl::bfs_visitor_list<typename V1::Graph, V1, Other...>
 make_bfs_visitor (V1 v, Other... other)
 {
-  return internals::
-    bfs_visitor_list<typename V1::Graph, V1, Other...> (v, other...);
+  return impl::bfs_visitor_list<typename V1::Graph, V1, Other...> (v, other...);
 }
 
 template <typename BaseVisitor,
@@ -593,6 +591,6 @@ record_bfs_distances (const Graph&, DistanceMap& dmap) {
 // ===================== template implementation ===============================
 
 
-} // namespace utils
+} // namespace gtl
 
 #endif

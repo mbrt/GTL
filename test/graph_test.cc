@@ -1,3 +1,32 @@
+// =============================================================================
+// 
+//       Filename:  graph_algorithms.hh
+// 
+//    Description:  A template set of algorithms for graph classes
+//
+//         Author:  Michele Bertasi 
+//        Contact:  michele.bertasi@gmail.com
+//      Copyright:  Copyright (c) 2009, Giuseppe Di Guglielmo
+//        Company:  University of Verona - ESD Group
+//        License:  GNU Lesser General Public License (GNU LGPL)
+//
+//      Agreement:                
+//       This file is part of 'GTL'.
+//       'GTL' is free software: you can redistribute it and/or
+//       modify it under the terms of the GNU Lesser General Public License 
+//       as published by the Free Software Foundation, either version 3 of 
+//       the License, or (at your option) any later version.
+//
+//       'GTL' is distributed in the hope that it will be useful,
+//       but WITHOUT ANY WARRANTY; without even the implied warranty of
+//       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//       GNU Lesser General Public License for more details.
+//
+//       You should have received a copy of the GNU Lesser General Public 
+//       License along with 'GTL'. 
+//       If not, see <http://www.gnu.org/licenses/>.
+// 
+// =============================================================================
 
 #include "../src/graph.hh"
 #define NEED_GCC_NO_VARIADIC_WORKAOUND
@@ -27,7 +56,7 @@ struct Foo {
 void multigraph_test()
 {
 #if 1
-  typedef utils::graph_t<int, int, true> G;
+  typedef gtl::graph_t<int, int, true> G;
   typedef G::vertex_descriptor Vertex;
   typedef G::edge_descriptor Edge;
   
@@ -279,7 +308,7 @@ void multigraph_test()
 void graph_test ()
 {
   #if 1
-  typedef utils::graph_t<int, int, false> G;
+  typedef gtl::graph_t<int, int, false> G;
   typedef G::vertex_descriptor Vertex;
   typedef G::edge_descriptor Edge;
   
@@ -537,7 +566,7 @@ struct vertex_val {
   
 };
 
-struct my_bfs_visitor : public utils::bfs_visitor<utils::graph_t<vertex_val, int, false> >
+struct my_bfs_visitor : public gtl::bfs_visitor<gtl::graph_t<vertex_val, int, false> >
 {
   void discover_vertex (Vertex u, Graph&) {
     int id = u->id;
@@ -553,7 +582,7 @@ struct my_bfs_visitor : public utils::bfs_visitor<utils::graph_t<vertex_val, int
   }
 };
 
-struct printer_bfs_visitor : public utils::bfs_visitor<utils::graph_t<vertex_val, int, false> >
+struct printer_bfs_visitor : public gtl::bfs_visitor<gtl::graph_t<vertex_val, int, false> >
 {
   void discover_vertex (Vertex u, Graph&) {
     std::cout << "Discover vertex " << u->id << std::endl;
@@ -563,12 +592,12 @@ struct printer_bfs_visitor : public utils::bfs_visitor<utils::graph_t<vertex_val
 
 void algorithms_test () 
 {
-  typedef utils::graph_t<vertex_val, int, false> G;
+  typedef gtl::graph_t<vertex_val, int, false> G;
   typedef G::vertex_descriptor Vertex;
   G graph;
   
   std::cout << "Color map\n";
-  utils::color_map_external_t<Vertex> col_map;
+  gtl::color_map_external_t<Vertex> col_map;
   assert (col_map.gray() == 1);
   Vertex v1 = graph.add_vertex (1);
   col_map.put (v1, col_map.white());
@@ -582,14 +611,14 @@ void algorithms_test ()
   graph.add_edge (v2, v1, 2);
   my_bfs_visitor my_v;
   printer_bfs_visitor printer_v;
-  typedef utils::color_map_internal_t<Vertex> color_map_t;
+  typedef gtl::color_map_internal_t<Vertex> color_map_t;
   color_map_t color_map;
-  utils::default_property_map<Vertex, Vertex> pred_map;
-  utils::default_property_map<Vertex, size_t> dist_map;
-  utils::breadth_first_search (graph, v1, 
-    utils::make_bfs_visitor (my_v, printer_v, 
-      utils::record_bfs_predecessors(graph, pred_map),
-      utils::record_bfs_distances(graph, dist_map)),
+  gtl::default_property_map<Vertex, Vertex> pred_map;
+  gtl::default_property_map<Vertex, size_t> dist_map;
+  gtl::breadth_first_search (graph, v1, 
+    gtl::make_bfs_visitor (my_v, printer_v, 
+      gtl::record_bfs_predecessors(graph, pred_map),
+      gtl::record_bfs_distances(graph, dist_map)),
     color_map);
   assert (color_map.get(v1) == color_map.black());
   assert (color_map.get(v2) == color_map.black());
@@ -611,7 +640,7 @@ int main ()
   algorithms_test();
   
   // NO DATA GRAPH  
-  typedef utils::graph_t<utils::NoData, utils::NoData, false> NDG;
+  typedef gtl::graph_t<gtl::NoData, gtl::NoData, false> NDG;
   NDG no_data_graph;
   NDG::vertex_descriptor ndv = no_data_graph.add_vertex();
   no_data_graph.add_edge (ndv, ndv);
