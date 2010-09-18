@@ -578,7 +578,7 @@ graph_t<Vdata, Edata, parallel, Allocator>::
 adjacent_vertices (vertex_descriptor v)
 {
   vertex_t* vertex = v.internal_value();
-  return std::make_pair<adjacency_iterator, adjacency_iterator>
+  return std::make_pair
     (adjacency_iterator(vertex->_out_edges.begin(), vertex->_out_edges),
      adjacency_iterator(vertex->_out_edges.end(), vertex->_out_edges));
 }

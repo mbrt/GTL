@@ -576,7 +576,7 @@ record_distances (const BaseVisitor& v, DistanceMap& dmap) {
 /// (using a property map) from some source vertex during a graph search. When 
 /// applied to edge e = (u,v), the distance of v is recorded to be one more 
 /// than the distance of u.
-/// All the vertices not reached by the visit has the distance setted to the 
+/// All the vertices not reached by the visit has the distance equal to the 
 /// maximum value of the distance type, and the start vertex is setted with
 /// distance zero.
 /// @param g the graph to visit. This parameter is only used to determine the
