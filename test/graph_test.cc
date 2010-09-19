@@ -641,7 +641,10 @@ void bgl_adaptor_test ()
   
   Vertex v = graph.add_vertex ();
   boost::default_bfs_visitor def_vis;
-//  boost::breadth_first_search(graph, v, visitor(def_vis));
+  std::map <Vertex, int> color_map;
+  std::queue<Vertex> que;
+//  boost::breadth_first_search(graph, v, que, def_vis,
+//    boost::std_container_adaptor<std::map<Vertex, int> >(color_map));
 }
 
 

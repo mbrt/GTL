@@ -32,9 +32,11 @@
 #define BGL_ADAPTOR_HH
 
 #include <boost/graph/graph_traits.hpp>
+#include <boost/property_map.hpp>
 #include <utility>
 
 #include "graph.hh"
+#include "graph_algorithms.hh"
 
 
 // The functions and classes in this file allows the user to
@@ -86,8 +88,8 @@ template <typename V, typename E, bool p, typename A>
 inline 
 std::pair <typename gtl::graph_t <V, E, p, A>::vertex_iterator,
            typename gtl::graph_t <V, E, p, A>::vertex_iterator>
-vertices (gtl::graph_t <V, E, p, A>& g) {
-  return g.vertices ();
+vertices (const gtl::graph_t <V, E, p, A>& g) {
+  return const_cast<gtl::graph_t <V, E, p, A>&>(g).vertices ();
 }
 
 
@@ -100,9 +102,39 @@ out_edges (typename gtl::graph_t<V, E, p, A>::vertex_descriptor v,
   return g.out_edges (v);
 }
 
+template <typename V, typename E, bool p, typename A>
+inline
+typename gtl::graph_t<V, E, p, A>::vertex_descriptor
+source (typename gtl::graph_t<V, E, p, A>::vertex_descriptor v,
+        gtl::graph_t<V, E, p, A>& g) {
+  return g.source (v);
+}
+
 
 // ---------------------------- property map ----------------------------------
 
+
+template <typename Container>
+class std_container_adaptor
+  : public put_get_helper <typename Container::value_type::second_type&, 
+                           std_container_adaptor<Container> >
+{
+public:
+  typedef lvalue_property_map_tag category;
+  typedef typename Container::key_type key_type;
+  typedef typename Container::value_type::second_type value_type;
+  typedef value_type& reference;
+  
+  std_container_adaptor () : m_c(NULL) {}
+  std_container_adaptor (Container& c) : m_c(&c) {}
+
+  reference operator[] (const key_type& k) const {
+    return (*m_c)[k];
+  }
+
+private:
+  Container* m_c;
+};
 
 
 } // namespace boost
