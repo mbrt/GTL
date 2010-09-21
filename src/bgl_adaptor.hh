@@ -84,23 +84,6 @@ struct graph_traits <gtl::graph_t<V, E, p, A> >
 // ----------------------------- functions ------------------------------------
 
 template <typename V, typename E, bool p, typename A>
-inline 
-std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_iterator,
-           typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_iterator>
-vertices (const gtl::graph_t <V, E, p, A>& g) {
-  return const_cast<gtl::graph_t <V, E, p, A>&>(g).vertices ();
-}
-
-template <typename V, typename E, bool p, typename A>
-inline 
-std::pair <typename gtl::graph_t<V, E, p, A>::out_edge_iterator,
-           typename gtl::graph_t<V, E, p, A>::out_edge_iterator>
-out_edges (typename gtl::graph_t<V, E, p, A>::vertex_descriptor v,
-           const gtl::graph_t <V, E, p, A>& g) {
-  return const_cast<gtl::graph_t<V, E, p, A>&>(g).out_edges (v);
-}
-
-template <typename V, typename E, bool p, typename A>
 inline
 typename gtl::graph_t<V, E, p, A>::vertex_descriptor
 source (typename gtl::graph_t<V, E, p, A>::edge_descriptor e,
@@ -117,15 +100,97 @@ target (typename gtl::graph_t<V, E, p, A>::edge_descriptor e,
 }
 
 template <typename V, typename E, bool p, typename A>
-inline size_t
-out_degree (typename gtl::graph_t<V, E, p, A>::vertex_descriptor v,
-            const gtl::graph_t<V, E, p, A>& g) {
+inline 
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_iterator,
+           typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_iterator>
+vertices (const gtl::graph_t <V, E, p, A>& g) {
+  return const_cast<gtl::graph_t <V, E, p, A>&>(g).vertices ();
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::edge_iterator,
+           typename graph_traits<gtl::graph_t<V, E, p, A> >::edge_iterator>
+edges (const gtl::graph_t <V, E, p, A>& g) {
+  return const_cast<gtl::graph_t <V, E, p, A>&>(g).edges ();
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::out_edge_iterator,
+           typename graph_traits<gtl::graph_t<V, E, p, A> >::out_edge_iterator>
+out_edges (typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+           const gtl::graph_t <V, E, p, A>& g) {
+  return const_cast<gtl::graph_t<V, E, p, A>&>(g).out_edges (v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::in_edge_iterator,
+           typename graph_traits<gtl::graph_t<V, E, p, A> >::in_edge_iterator>
+in_edges (typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+          const gtl::graph_t <V, E, p, A>& g) {
+  return const_cast<gtl::graph_t<V, E, p, A>&>(g).in_edges (v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::adjacency_iterator,
+           typename graph_traits<gtl::graph_t<V, E, p, A> >::adjacency_iterator>
+adjacent_vertices (
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    const gtl::graph_t<V, E, p, A>& g) {
+  return const_cast<gtl::graph_t<V, E, p, A>&>(g).adjacent_vertices (v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+typename graph_traits<gtl::graph_t<V, E, p, A> >::vertices_size_type
+num_vertices (const gtl::graph_t<V, E, p, A>& g) {
+  return g.num_vertices ();
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+typename graph_traits<gtl::graph_t<V, E, p, A> >::edges_size_type
+num_edges (const gtl::graph_t<V, E, p, A>& g) {
+  return g.num_edges ();
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+typename graph_traits<gtl::graph_t<V, E, p, A> >::degree_size_type
+out_degree (
+    typename graph_traits <gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    const gtl::graph_t<V, E, p, A>& g) {
   return g.out_degree (v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+typename graph_traits<gtl::graph_t<V, E, p, A> >::degree_size_type
+in_degree (
+    typename graph_traits <gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    const gtl::graph_t<V, E, p, A>& g) {
+  return g.in_degree (v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline
+typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor
+add_vertex (gtl::graph_t<V, E, p, A>& g) {
+  return g.add_vertex ();
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor
+add_vertex (const V& data, gtl::graph_t<V, E, p, A>& g) {
+  return g.add_vertex (data);
 }
 
 
 // ---------------------------- property map ----------------------------------
-
 
 template <typename Container>
 class std_container_adaptor

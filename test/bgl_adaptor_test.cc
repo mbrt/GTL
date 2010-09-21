@@ -36,7 +36,6 @@
 #include <map>
 #include <cassert>
 
-
 #define PASSED std::cout << "passed\n"
 
 
@@ -53,8 +52,22 @@ void bgl_adaptor_test ()
 {
   typedef gtl::graph_t<vertex_val, int, false> G;
   typedef G::vertex_descriptor Vertex;
+  typedef G::edge_descriptor Edge;
   G graph;
-  Vertex v = graph.add_vertex ();
+  Vertex v = boost::add_vertex (vertex_val(1), graph);
+  std::pair <Edge, bool> edge_pair = graph.add_edge (v, v, 1);
+  Edge e1 = edge_pair.first;
+  
+  assert (boost::source (e1, graph) == v);
+  assert (boost::target (e1, graph) == v);
+  boost::vertices (graph);
+  boost::edges (graph);
+  boost::out_edges (v, graph);
+  boost::in_edges (v, graph);
+  boost::num_vertices (graph);
+  boost::num_edges (graph);
+  boost::out_degree (v, graph);
+  boost::in_degree (v, graph);
   
   std::map <Vertex, int> color_map;
   boost::vertices (graph);
