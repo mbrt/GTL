@@ -612,8 +612,7 @@ void algorithms_test ()
   graph.add_edge (v2, v1, 2);
   my_bfs_visitor my_v;
   printer_bfs_visitor printer_v;
-  typedef gtl::color_map_internal_t<Vertex> color_map_t;
-  color_map_t color_map;
+  gtl::color_map_internal_t<Vertex> color_map;
   gtl::default_property_map<Vertex, Vertex> pred_map;
   gtl::default_property_map<Vertex, size_t> dist_map;
   gtl::breadth_first_search (graph, v1, 
