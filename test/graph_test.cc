@@ -31,7 +31,6 @@
 #include "../src/graph.hh"
 #define NEED_GCC_NO_VARIADIC_WORKAOUND
 #include "../src/graph_algorithms.hh"
-#include "../src/bgl_adaptor.hh"
 
 #include <cassert>
 #include <boost/foreach.hpp>
@@ -39,7 +38,6 @@
 #include <map>
 #include <tr1/functional>
 //#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/breadth_first_search.hpp>
 
 
 #define foreach BOOST_FOREACH
@@ -633,20 +631,6 @@ void algorithms_test ()
   PASSED;
 }
 
-void bgl_adaptor_test ()
-{
-  typedef gtl::graph_t<vertex_val, int, false> G;
-  typedef G::vertex_descriptor Vertex;
-  G graph;
-  
-  Vertex v = graph.add_vertex ();
-  boost::default_bfs_visitor def_vis;
-  std::map <Vertex, int> color_map;
-  std::queue<Vertex> que;
-//  boost::breadth_first_search(graph, v, que, def_vis,
-//    boost::std_container_adaptor<std::map<Vertex, int> >(color_map));
-}
-
 
 int main ()
 { 
@@ -656,7 +640,6 @@ int main ()
   graph_test();
   std::cout << "ALGORITHMS TEST\n";
   algorithms_test();
-  bgl_adaptor_test();
   
   // NO DATA GRAPH  
   typedef gtl::graph_t<gtl::NoData, gtl::NoData, false> NDG;

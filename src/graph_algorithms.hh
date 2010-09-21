@@ -140,6 +140,9 @@ public:
   Value get (Descriptor d)
   { return _map[d]; }
 
+  Value& operator[] (Descriptor d)
+  { return _map[d]; }
+
 private:
   Map _map;
 

@@ -6,7 +6,7 @@
 //
 //         Author:  Michele Bertasi 
 //        Contact:  michele.bertasi@gmail.com
-//      Copyright:  Copyright (c) 2009, Giuseppe Di Guglielmo
+//      Copyright:  Copyright (c) 2010, Michele Bertasi
 //        Company:  University of Verona - ESD Group
 //        License:  GNU Lesser General Public License (GNU LGPL)
 //
@@ -36,7 +36,6 @@
 #include <utility>
 
 #include "graph.hh"
-#include "graph_algorithms.hh"
 
 
 // The functions and classes in this file allows the user to
@@ -86,28 +85,42 @@ struct graph_traits <gtl::graph_t<V, E, p, A> >
 
 template <typename V, typename E, bool p, typename A>
 inline 
-std::pair <typename gtl::graph_t <V, E, p, A>::vertex_iterator,
-           typename gtl::graph_t <V, E, p, A>::vertex_iterator>
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_iterator,
+           typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_iterator>
 vertices (const gtl::graph_t <V, E, p, A>& g) {
   return const_cast<gtl::graph_t <V, E, p, A>&>(g).vertices ();
 }
-
 
 template <typename V, typename E, bool p, typename A>
 inline 
 std::pair <typename gtl::graph_t<V, E, p, A>::out_edge_iterator,
            typename gtl::graph_t<V, E, p, A>::out_edge_iterator>
 out_edges (typename gtl::graph_t<V, E, p, A>::vertex_descriptor v,
-           gtl::graph_t <V, E, p, A>& g) {
-  return g.out_edges (v);
+           const gtl::graph_t <V, E, p, A>& g) {
+  return const_cast<gtl::graph_t<V, E, p, A>&>(g).out_edges (v);
 }
 
 template <typename V, typename E, bool p, typename A>
 inline
 typename gtl::graph_t<V, E, p, A>::vertex_descriptor
-source (typename gtl::graph_t<V, E, p, A>::vertex_descriptor v,
-        gtl::graph_t<V, E, p, A>& g) {
-  return g.source (v);
+source (typename gtl::graph_t<V, E, p, A>::edge_descriptor e,
+        const gtl::graph_t<V, E, p, A>& g) {
+  return const_cast<gtl::graph_t<V, E, p, A>&>(g).source (e);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline
+typename gtl::graph_t<V, E, p, A>::vertex_descriptor
+target (typename gtl::graph_t<V, E, p, A>::edge_descriptor e,
+        const gtl::graph_t<V, E, p, A>& g) {
+  return const_cast<gtl::graph_t<V, E, p, A>&>(g).target (e);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline size_t
+out_degree (typename gtl::graph_t<V, E, p, A>::vertex_descriptor v,
+            const gtl::graph_t<V, E, p, A>& g) {
+  return g.out_degree (v);
 }
 
 
