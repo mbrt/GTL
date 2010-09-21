@@ -216,11 +216,13 @@ void
 breadth_first_search (Graph& g, 
                       typename Graph::vertex_descriptor s, 
                       BFSVisitor vis, 
-                      ColorMap color,
+                      ColorMap color_map,
                       Queue q)
 {
   typedef typename Graph::vertex_descriptor Vertex;
   typedef typename Graph::edge_descriptor Edge;
+  typedef typename ColorMap::value_type ColorValue;
+  typedef color_traits<ColorValue> Color;
 
   typename Graph::vertex_iterator it, end;
   typename Graph::out_edge_iterator ei, ei_end;
@@ -228,10 +230,10 @@ breadth_first_search (Graph& g,
   std::tr1::tie(it, end) = g.vertices();
   for (; it != end; ++it) {
     vis.initialize_vertex (*it, g);   // visitor
-    color.put (*it, color.white());
+    color_map.put (*it, Color::white());
   }
   vis.start_vertex (s, g);            // visitor
-  color.put (s, color.gray());
+  color_map.put (s, Color::gray());
   vis.discover_vertex (s, g);         // visitor
   q.push (s);
   while (! q.empty()) {
@@ -243,22 +245,22 @@ breadth_first_search (Graph& g,
       Edge e = *ei;
       Vertex v = g.target (e);
       vis.examine_edge (e, g);        // visitor
-      typename ColorMap::Color v_color = color.get(v);
-      if (v_color == color.white()) {
+      ColorValue v_color = color_map.get(v);
+      if (v_color == Color::white()) {
         vis.tree_edge (e, g);         // visitor
-        color.put (v, color.gray());
+        color_map.put (v, Color::gray());
         vis.discover_vertex (v, g);   // visitor
         q.push (v);
       }
       else {
         vis.non_tree_edge (e, g);     // visitor
-        if (v_color == color.gray())
+        if (v_color == Color::gray())
           vis.gray_target (e, g);     // visitor
         else
           vis.black_target (e, g);    // visitor
       }
     } // end for
-    color.put (u, color.black());
+    color_map.put (u, Color::black());
     vis.finish_vertex (u, g);         // visitor
   } // end while
 }
@@ -310,7 +312,7 @@ breadth_first_search (Graph& g,
 {
   typedef typename Graph::vertex_descriptor Vertex;
   return breadth_first_search (g, s, vis,
-      color_map_external_t<Vertex>(),
+      property_map_external_t<Vertex, default_color_t>(),
       std::queue<Vertex>());
 }
 
@@ -330,7 +332,7 @@ breadth_first_search (Graph& g, typename Graph::vertex_descriptor s)
   typedef typename Graph::vertex_descriptor Vertex;
   return breadth_first_search (g, s,
       bfs_visitor<Graph>(),
-      color_map_external_t<Vertex>(),
+      property_map_external_t<Vertex, default_color_t>(),
       std::queue<Vertex>());
 }
 
@@ -434,8 +436,8 @@ make_bfs_visitor (V1 v, Other... other)
 
 template <typename BaseVisitor,
           typename PredecessorMap = 
-            default_property_map<typename BaseVisitor::Vertex,
-                                 typename BaseVisitor::Vertex> >
+            property_map_external_t<typename BaseVisitor::Vertex,
+                                    typename BaseVisitor::Vertex> >
 struct predecessor_recorder
   : public BaseVisitor
 {
@@ -460,8 +462,8 @@ struct predecessor_recorder
 ///  predecessor
 template <typename Graph, 
           typename PredecessorMap = 
-            default_property_map<typename Graph::vertex_descriptor,
-                                 typename Graph::vertex_descriptor> >
+            property_map_external_t<typename Graph::vertex_descriptor,
+                                    typename Graph::vertex_descriptor> >
 struct bfs_predecessor_recorder 
   : public predecessor_recorder <bfs_visitor<Graph>, PredecessorMap>
 { 
@@ -501,7 +503,7 @@ record_bfs_predecessors (const Graph&, PredecessorMap& pmap) {
 
 template <typename BaseVisitor,
           typename DistanceMap = 
-            default_property_map<typename BaseVisitor::Vertex, size_t> >
+            property_map_external_t<typename BaseVisitor::Vertex, size_t> >
 struct distance_recorder
   : public BaseVisitor
 {
@@ -539,7 +541,7 @@ struct distance_recorder
 ///  distance
 template <typename Graph, 
           typename DistanceMap = 
-            default_property_map<typename Graph::vertex_descriptor, size_t> >
+            property_map_external_t<typename Graph::vertex_descriptor, size_t> >
 struct bfs_distance_recorder 
   : public distance_recorder <bfs_visitor<Graph>, DistanceMap>
 {
@@ -552,8 +554,8 @@ struct bfs_distance_recorder
 /// a property map) from some source vertex during a graph search. When applied 
 /// to edge e = (u,v), the distance of v is recorded to be one more than the 
 /// distance of u.
-/// @param v the base visitor (use bfs_visitor or dfs_visitor). This parameter is
-///  only used to determine the type of the base visitor. No copies nor 
+/// @param v the base visitor (use bfs_visitor or dfs_visitor). This parameter
+///  is only used to determine the type of the base visitor. No copies nor 
 ///  references are taken from this parameter
 /// @param dmap the map the map that associate each vertex to its predecessor
 ///  distance

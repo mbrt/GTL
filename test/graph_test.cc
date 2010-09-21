@@ -598,11 +598,11 @@ void algorithms_test ()
   G graph;
   
   std::cout << "Color map\n";
-  gtl::color_map_external_t<Vertex> col_map;
-  assert (col_map.gray() == 1);
+  gtl::property_map_external_t<Vertex, gtl::default_color_t> col_map;
+  typedef gtl::color_traits<gtl::default_color_t> Color;
   Vertex v1 = graph.add_vertex (1);
-  col_map.put (v1, col_map.white());
-  assert (col_map.get (v1) == col_map.white());
+  col_map.put (v1, Color::white());
+  assert (col_map.get (v1) == Color::white());
   PASSED;
   
   std::cout << "BFS visit\n";
@@ -610,23 +610,23 @@ void algorithms_test ()
   Vertex v3 = graph.add_vertex (3);
   graph.add_edge (v1, v2, 1);
   graph.add_edge (v2, v1, 2);
-//  my_bfs_visitor my_v;
-//  printer_bfs_visitor printer_v;
-//  gtl::color_map_internal_t<Vertex> color_map;
-//  gtl::default_property_map<Vertex, Vertex> pred_map;
-//  gtl::default_property_map<Vertex, size_t> dist_map;
-//  gtl::breadth_first_search (graph, v1, 
-//    gtl::make_bfs_visitor (my_v, printer_v, 
-//      gtl::record_bfs_predecessors(graph, pred_map),
-//      gtl::record_bfs_distances(graph, dist_map)),
-//    color_map);
-//  assert (color_map.get(v1) == color_map.black());
-//  assert (color_map.get(v2) == color_map.black());
-//  assert (color_map.get(v3) == color_map.white());
-//  assert (pred_map.get(v2) == v1);
-//  assert (dist_map.get(v1) == 0);
-//  assert (dist_map.get(v2) == 1);
-//  assert (dist_map.get(v3) == std::numeric_limits<size_t>::max());
+  my_bfs_visitor my_v;
+  printer_bfs_visitor printer_v;
+  gtl::property_map_external_t<Vertex, gtl::default_color_t> color_map;
+  gtl::property_map_external_t<Vertex, Vertex> pred_map;
+  gtl::property_map_external_t<Vertex, size_t> dist_map;
+  gtl::breadth_first_search (graph, v1, 
+    gtl::make_bfs_visitor (my_v, printer_v, 
+      gtl::record_bfs_predecessors(graph, pred_map),
+      gtl::record_bfs_distances(graph, dist_map)),
+    color_map);
+//  assert (color_map.get(v1) == Color::black());
+//  assert (color_map.get(v2) == Color::black());
+//  assert (color_map.get(v3) == Color::white());
+  assert (pred_map.get(v2) == v1);
+  assert (dist_map.get(v1) == 0);
+  assert (dist_map.get(v2) == 1);
+  assert (dist_map.get(v3) == std::numeric_limits<size_t>::max());
   PASSED;
 }
 
