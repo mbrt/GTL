@@ -32,9 +32,12 @@
 #include "../src/bgl_adaptor.hh"
 
 #include <boost/graph/breadth_first_search.hpp>
+#include <boost/graph/topological_sort.hpp>
 #include <iostream>
 #include <map>
 #include <cassert>
+#include <vector>
+#include <deque>
 
 #define PASSED std::cout << "passed\n"
 
@@ -69,21 +72,60 @@ void bgl_adaptor_test ()
   boost::out_degree (v, graph);
   boost::in_degree (v, graph);
   
-  std::map <Vertex, int> color_map;
+  std::map <Vertex, int> col_map;
   boost::vertices (graph);
   boost::breadth_first_search(graph, v, 
-    boost::color_map(boost::std_container_adaptor<std::map<Vertex, int> >(color_map)));
+    boost::color_map(boost::std_container_adaptor<std::map<Vertex, int> >(col_map)));
   
   boost::remove_edge (e, graph);
   boost::remove_edge (v, v, graph);
   boost::clear_vertex (v, graph);
   boost::remove_vertex (v, graph);
   
+  PASSED;
+}
+
+
+void bgl_topo_sort_test()
+{
+  typedef gtl::graph_t<const char*, gtl::NoData> G;
+  typedef G::vertex_descriptor Vertex;
+  G graph;
+  
+  std::vector<Vertex> vert(7);
+  vert[0] = boost::add_vertex ((const char*)"pick up kids from school", graph);
+  vert[1] = boost::add_vertex ((const char*)"buy groceries (and snacks)", graph);
+  vert[2] = boost::add_vertex ((const char*)"get cash at ATM", graph);
+  vert[3] = boost::add_vertex ((const char*)"drop off kids at soccer practice", graph);
+  vert[4] = boost::add_vertex ((const char*)"cook dinner", graph);
+  vert[5] = boost::add_vertex ((const char*)"pick up kids from soccer", graph);
+  vert[6] = boost::add_vertex ((const char*)"eat dinner", graph);
+  
+  boost::add_edge (vert[0], vert[3], graph);
+  boost::add_edge (vert[1], vert[3], graph);
+  boost::add_edge (vert[1], vert[4], graph);
+  boost::add_edge (vert[2], vert[1], graph);
+  boost::add_edge (vert[3], vert[5], graph);
+  boost::add_edge (vert[4], vert[6], graph);
+  boost::add_edge (vert[5], vert[6], graph);
+  
+  std::map <Vertex, int> col_map;
+  std::deque<Vertex> topo_order;
+  
+  boost::topological_sort (graph, std::front_inserter (topo_order),
+    boost::std_container_adaptor<std::map<Vertex, int> >(col_map));
+  
+  int n = 1;
+  for (std::deque<Vertex>::iterator it = topo_order.begin();
+       it != topo_order.end(); ++it, ++n)
+    std::cout << n << ": " << **it << std::endl;
 }
 
 
 int main()
 {
   bgl_adaptor_test ();
+  bgl_topo_sort_test ();
+  std::cout << "All the tests are passed!\n";
   
 }
