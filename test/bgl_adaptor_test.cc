@@ -113,7 +113,7 @@ void bgl_topo_sort_test()
   std::deque<Vertex> topo_order;
   
   boost::topological_sort (graph, std::front_inserter (topo_order),
-    boost::std_container_adaptor<std::map<Vertex, int> >(col_map));
+    boost::color_map(boost::std_container_adaptor<std::map<Vertex, int> >(col_map)));
   
   int n = 1;
   for (std::deque<Vertex>::iterator it = topo_order.begin();
