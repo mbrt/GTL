@@ -559,7 +559,7 @@ void graph_test ()
 }
 
 struct vertex_val {
-  int color;
+  gtl::default_color_t color;
   int id;
   
   vertex_val () {}
@@ -598,7 +598,7 @@ void algorithms_test ()
   G graph;
   
   std::cout << "Color map\n";
-  gtl::property_map_external_t<Vertex, gtl::default_color_t> col_map;
+  gtl::property_map_internal_t<Vertex, gtl::default_color_t> col_map (&vertex_val::color);
   typedef gtl::color_traits<gtl::default_color_t> Color;
   Vertex v1 = graph.add_vertex (1);
   col_map.put (v1, Color::white());
@@ -620,14 +620,19 @@ void algorithms_test ()
       gtl::record_bfs_predecessors(graph, pred_map),
       gtl::record_bfs_distances(graph, dist_map)),
     color_map);
-//  assert (color_map.get(v1) == Color::black());
-//  assert (color_map.get(v2) == Color::black());
-//  assert (color_map.get(v3) == Color::white());
+  assert (color_map.get(v1) == Color::black());
+  assert (color_map.get(v2) == Color::black());
+  assert (color_map.get(v3) == Color::white());
   assert (pred_map.get(v2) == v1);
   assert (dist_map.get(v1) == 0);
   assert (dist_map.get(v2) == 1);
   assert (dist_map.get(v3) == std::numeric_limits<size_t>::max());
   PASSED;
+  
+  gtl::default_color_t vertex_val::*pointer;
+  pointer = &vertex_val::color;
+  (*v1).*pointer = Color::green();
+  assert (v1->color == Color::green());
 }
 
 

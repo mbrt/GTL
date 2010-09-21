@@ -138,6 +138,44 @@ private:
 
 };
 
+/// If the vertex (or edge) type is a struct (or a class), this map holds a 
+/// pointer to a given member. When put and get functions are called the value 
+/// stored in the vertex (or the edge) is used. The access time is constant and
+/// consists of one pointer sum and a dereference (therefore in constant time).
+/// It can be used as property map (when possible is suggested to use this class
+/// instead of the property_map_external_t, that uses a map or an hash-map that 
+/// are slower)
+/// @tparam Descriptor the descriptor type
+/// @tparam Value the value to be stored for each descriptor
+/// @tparam Data the type of the vertex (or edge) data stored (it must be a 
+///  struct or a class, that contains the desired member
+template <typename Descriptor,
+          typename Value,
+          typename Data = typename Descriptor::value_type>
+class property_map_internal_t
+{
+public:
+  typedef Descriptor descriptor_type;
+  typedef Value value_type;
+  
+  property_map_internal_t (Value Data::*member) : m_member (member) {}
+
+  /// Assign to the descriptor property the given value
+  void put (Descriptor d, Value v)
+  { (*d).*m_member = v; }
+
+  /// Returns the descriptor property (a copy)
+  Value get (Descriptor d)
+  { return (*d).*m_member; }
+
+  Value& operator[] (Descriptor d)
+  { return (*d).*m_member; }
+
+private:
+  Value Data::*m_member;
+
+};
+
 /// Default BFS visitor. You can inherit from this overriding some operations
 /// called during the BFS visit.
 /// @tparam Graph the graph class
