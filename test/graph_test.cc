@@ -581,6 +581,12 @@ struct my_bfs_visitor : public gtl::bfs_visitor<gtl::graph_t<vertex_val, int, fa
   void gray_target (Edge e, Graph& g) {
     assert (*e == 1 && g.target(e)->id == 1);
   }
+  
+  void finish_vertex (Vertex v, Graph&) {
+    std::cout << "Color of: " << v->id << " = " << v->color << std::endl;
+    assert (v->color == gtl::color_traits<gtl::default_color_t>::black());
+  }
+  
 };
 
 struct printer_bfs_visitor : public gtl::bfs_visitor<gtl::graph_t<vertex_val, int, false> >
@@ -598,11 +604,11 @@ void algorithms_test ()
   G graph;
   
   std::cout << "Color map\n";
-  gtl::property_map_internal_t<Vertex, gtl::default_color_t> col_map (&vertex_val::color);
+  gtl::property_map_external_t<Vertex, gtl::default_color_t> col_map;
   typedef gtl::color_traits<gtl::default_color_t> Color;
   Vertex v1 = graph.add_vertex (1);
-  col_map.put (v1, Color::white());
-  assert (col_map.get (v1) == Color::white());
+  col_map.put (v1, Color::black());
+  assert (col_map.get (v1) == Color::black());
   PASSED;
   
   std::cout << "BFS visit\n";
@@ -612,7 +618,8 @@ void algorithms_test ()
   graph.add_edge (v2, v1, 2);
   my_bfs_visitor my_v;
   printer_bfs_visitor printer_v;
-  gtl::property_map_external_t<Vertex, gtl::default_color_t> color_map;
+  gtl::property_map_internal_t<Vertex, gtl::default_color_t> 
+    color_map (&vertex_val::color);
   gtl::property_map_external_t<Vertex, Vertex> pred_map;
   gtl::property_map_external_t<Vertex, size_t> dist_map;
   gtl::breadth_first_search (graph, v1, 

@@ -45,7 +45,7 @@
 namespace gtl {
 
 enum default_color_t { 
-  white_color, gray_color, green_color, red_color, black_color 
+  white_color, gray_color, black_color, green_color, red_color 
 };
 
 /// Default color traits class
@@ -59,53 +59,6 @@ struct color_traits
   static default_color_t green() { return green_color; }
 };
 
-// /// Default color map with external storage. It creates an hash-table that 
-// /// associate a vertex_descriptor to a color (white, gray or black). The 
-// /// type of the color is managed by the second template parameter. See
-// /// color_map documentation for more detail.
-// /// @tparam Vertex the vertex_descriptor type
-// /// @tparam ColorMap the type of the color and the color values
-// /// @tparam VertexMap the container that associate a vertex to the color
-// template <typename Vertex, 
-//           typename ColorMap = color_map<int, 0, 1, 2>,
-//           typename VertexMap = std::tr1::unordered_map
-//             <Vertex, typename ColorMap::Color, typename Vertex::hasher> >
-// class color_map_external_t : public ColorMap
-// {
-// public:
-//   /// Assign to the vertex the color given
-//   void put (Vertex v, typename ColorMap::Color c) 
-//   { _map[v] = c; }
-// 
-//   /// Returns the color of the given vertex. If the color of the vertex is
-//   /// not previously setted, the result is unspecified
-//   typename ColorMap::Color get (Vertex v) 
-//   { return _map[v]; }
-// 
-// private:
-//   VertexMap _map;
-//    
-// };
-// 
-// /// Color map with internal storage. It assumes that the vertex has a field
-// /// named color. The type and the color values are managed by the second 
-// /// template parameter. See color_map documentation for more detail.
-// /// @tparam Vertex the vertex_descriptor type
-// /// @tparam ColorMap the type of the color and the color values
-// template <typename Vertex, 
-//           typename ColorMap = color_map<int, 0, 1, 2> >
-// struct color_map_internal_t : public ColorMap
-// {
-//   /// Assign to the vertex the color given
-//   void put (Vertex v, typename ColorMap::Color c) 
-//   { v->color = c; }
-// 
-//   /// Returns the color of the given vertex. If the color of the vertex is
-//   /// not previously setted, the result is unspecified
-//   typename ColorMap::Color get (Vertex v) 
-//   { return v->color; }
-//   
-// };
 
 /// Associates descriptors (vertex or edges) to properties. The property type
 /// must be copy constructible. A copy of the given value is stored in the map.
@@ -254,7 +207,7 @@ void
 breadth_first_search (Graph& g, 
                       typename Graph::vertex_descriptor s, 
                       BFSVisitor vis, 
-                      ColorMap color_map,
+                      ColorMap& color_map,
                       Queue q)
 {
   typedef typename Graph::vertex_descriptor Vertex;
@@ -325,7 +278,7 @@ inline void
 breadth_first_search (Graph& g, 
                       typename Graph::vertex_descriptor s, 
                       BFSVisitor vis, 
-                      ColorMap color)
+                      ColorMap& color)
 {
   return breadth_first_search (g, s, vis, color, 
       std::queue<typename Graph::vertex_descriptor>());
@@ -349,8 +302,8 @@ breadth_first_search (Graph& g,
                       BFSVisitor vis)
 {
   typedef typename Graph::vertex_descriptor Vertex;
-  return breadth_first_search (g, s, vis,
-      property_map_external_t<Vertex, default_color_t>(),
+  property_map_external_t<Vertex, default_color_t> cmap;
+  return breadth_first_search (g, s, vis, cmap,
       std::queue<Vertex>());
 }
 
@@ -368,9 +321,10 @@ inline void
 breadth_first_search (Graph& g, typename Graph::vertex_descriptor s)
 {
   typedef typename Graph::vertex_descriptor Vertex;
+  property_map_external_t<Vertex, default_color_t> cmap;
   return breadth_first_search (g, s,
-      bfs_visitor<Graph>(),
-      property_map_external_t<Vertex, default_color_t>(),
+      bfs_visitor<Graph>(), 
+      cmap,
       std::queue<Vertex>());
 }
 
