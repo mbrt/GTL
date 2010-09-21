@@ -44,78 +44,68 @@
 
 namespace gtl {
 
-/// Base class for color maps
-/// @tparam _Color the type of the color
-/// @tparam white_color the value assumed as white
-/// @tparam gray_color the value assumed as gray
-/// @tparam black_color the value assumed as black
-template <typename _Color, 
-          _Color white_color, _Color gray_color, _Color black_color>
-struct color_map
-{
-  typedef _Color Color;
-
-  Color white() {
-    return white_color;
-  }
-  
-  Color gray() {
-    return gray_color;
-  }
-
-  Color black() {
-    return black_color;
-  }
-
+enum default_color_t { 
+  white_color, gray_color, green_color, red_color, black_color 
 };
 
-/// Default color map with external storage. It creates an hash-table that 
-/// associate a vertex_descriptor to a color (white, gray or black). The 
-/// type of the color is managed by the second template parameter. See
-/// color_map documentation for more detail.
-/// @tparam Vertex the vertex_descriptor type
-/// @tparam ColorMap the type of the color and the color values
-/// @tparam VertexMap the container that associate a vertex to the color
-template <typename Vertex, 
-          typename ColorMap = color_map<int, 0, 1, 2>,
-          typename VertexMap = std::tr1::unordered_map
-            <Vertex, typename ColorMap::Color, typename Vertex::hasher> >
-class color_map_external_t : public ColorMap
+/// Default color traits class
+template <typename Color>
+struct color_traits
 {
-public:
-  /// Assign to the vertex the color given
-  void put (Vertex v, typename ColorMap::Color c) 
-  { _map[v] = c; }
-
-  /// Returns the color of the given vertex. If the color of the vertex is
-  /// not previously setted, the result is unspecified
-  typename ColorMap::Color get (Vertex v) 
-  { return _map[v]; }
-
-private:
-  VertexMap _map;
-   
+  static default_color_t white() { return white_color; }
+  static default_color_t gray()  { return gray_color; }
+  static default_color_t black() { return black_color; }
+  static default_color_t red() { return red_color; }
+  static default_color_t green() { return green_color; }
 };
 
-/// Color map with internal storage. It assumes that the vertex has a field
-/// named color. The type and the color values are managed by the second 
-/// template parameter. See color_map documentation for more detail.
-/// @tparam Vertex the vertex_descriptor type
-/// @tparam ColorMap the type of the color and the color values
-template <typename Vertex, 
-          typename ColorMap = color_map<int, 0, 1, 2> >
-struct color_map_internal_t : public ColorMap
-{
-  /// Assign to the vertex the color given
-  void put (Vertex v, typename ColorMap::Color c) 
-  { v->color = c; }
-
-  /// Returns the color of the given vertex. If the color of the vertex is
-  /// not previously setted, the result is unspecified
-  typename ColorMap::Color get (Vertex v) 
-  { return v->color; }
-  
-};
+// /// Default color map with external storage. It creates an hash-table that 
+// /// associate a vertex_descriptor to a color (white, gray or black). The 
+// /// type of the color is managed by the second template parameter. See
+// /// color_map documentation for more detail.
+// /// @tparam Vertex the vertex_descriptor type
+// /// @tparam ColorMap the type of the color and the color values
+// /// @tparam VertexMap the container that associate a vertex to the color
+// template <typename Vertex, 
+//           typename ColorMap = color_map<int, 0, 1, 2>,
+//           typename VertexMap = std::tr1::unordered_map
+//             <Vertex, typename ColorMap::Color, typename Vertex::hasher> >
+// class color_map_external_t : public ColorMap
+// {
+// public:
+//   /// Assign to the vertex the color given
+//   void put (Vertex v, typename ColorMap::Color c) 
+//   { _map[v] = c; }
+// 
+//   /// Returns the color of the given vertex. If the color of the vertex is
+//   /// not previously setted, the result is unspecified
+//   typename ColorMap::Color get (Vertex v) 
+//   { return _map[v]; }
+// 
+// private:
+//   VertexMap _map;
+//    
+// };
+// 
+// /// Color map with internal storage. It assumes that the vertex has a field
+// /// named color. The type and the color values are managed by the second 
+// /// template parameter. See color_map documentation for more detail.
+// /// @tparam Vertex the vertex_descriptor type
+// /// @tparam ColorMap the type of the color and the color values
+// template <typename Vertex, 
+//           typename ColorMap = color_map<int, 0, 1, 2> >
+// struct color_map_internal_t : public ColorMap
+// {
+//   /// Assign to the vertex the color given
+//   void put (Vertex v, typename ColorMap::Color c) 
+//   { v->color = c; }
+// 
+//   /// Returns the color of the given vertex. If the color of the vertex is
+//   /// not previously setted, the result is unspecified
+//   typename ColorMap::Color get (Vertex v) 
+//   { return v->color; }
+//   
+// };
 
 /// Associates descriptors (vertex or edges) to properties. The property type
 /// must be copy constructible. A copy of the given value is stored in the map.
@@ -125,7 +115,7 @@ struct color_map_internal_t : public ColorMap
 template <typename Descriptor,
           typename Value,
           typename Map = std::map<Descriptor, Value> >
-class default_property_map
+class property_map_external_t
 {
 public:
   typedef Descriptor descriptor_type;
