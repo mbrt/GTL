@@ -55,11 +55,11 @@ void bgl_adaptor_test ()
   typedef G::edge_descriptor Edge;
   G graph;
   Vertex v = boost::add_vertex (vertex_val(1), graph);
-  std::pair <Edge, bool> edge_pair = graph.add_edge (v, v, 1);
-  Edge e1 = edge_pair.first;
+  std::pair <Edge, bool> edge_pair = boost::add_edge (v, v, 1, graph);
+  Edge e = edge_pair.first;
   
-  assert (boost::source (e1, graph) == v);
-  assert (boost::target (e1, graph) == v);
+  assert (boost::source (e, graph) == v);
+  assert (boost::target (e, graph) == v);
   boost::vertices (graph);
   boost::edges (graph);
   boost::out_edges (v, graph);
@@ -73,6 +73,12 @@ void bgl_adaptor_test ()
   boost::vertices (graph);
   boost::breadth_first_search(graph, v, 
     boost::color_map(boost::std_container_adaptor<std::map<Vertex, int> >(color_map)));
+  
+  boost::remove_edge (e, graph);
+  boost::remove_edge (v, v, graph);
+  boost::clear_vertex (v, graph);
+  boost::remove_vertex (v, graph);
+  
 }
 
 

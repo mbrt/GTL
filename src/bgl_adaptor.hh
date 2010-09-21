@@ -189,6 +189,61 @@ add_vertex (const V& data, gtl::graph_t<V, E, p, A>& g) {
   return g.add_vertex (data);
 }
 
+template <typename V, typename E, bool p, typename A>
+inline void
+clear_vertex (
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    gtl::graph_t<V, E, p, A>& g) {
+  g.clear_vertex (v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline void
+remove_vertex (
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    gtl::graph_t<V, E, p, A>& g) {
+  g.remove_vertex (v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::edge_descriptor, 
+           bool>
+add_edge (
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor u,
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    gtl::graph_t<V, E, p, A>& g) {
+  return g.add_edge (u, v);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline 
+std::pair <typename graph_traits<gtl::graph_t<V, E, p, A> >::edge_descriptor, 
+           bool>
+add_edge (
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor u,
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    const E& data,
+    gtl::graph_t<V, E, p, A>& g) {
+  return g.add_edge (u, v, data);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline void
+remove_edge (
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::edge_descriptor e,
+    gtl::graph_t<V, E, p, A>& g) {
+  g.remove_edge (e);
+}
+
+template <typename V, typename E, bool p, typename A>
+inline void
+remove_edge (
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor u,
+    typename graph_traits<gtl::graph_t<V, E, p, A> >::vertex_descriptor v,
+    gtl::graph_t<V, E, p, A>& g) {
+  g.remove_edge (u, v);
+}
 
 // ---------------------------- property map ----------------------------------
 
