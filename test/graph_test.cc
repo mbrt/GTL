@@ -37,6 +37,7 @@
 #include <iostream>
 #include <map>
 #include <tr1/functional>
+#include <tr1/unordered_set>
 //#include <boost/graph/adjacency_list.hpp>
 
 
@@ -554,7 +555,12 @@ void graph_test ()
   assert (count == 3);
   PASSED;
   
-
+  std::cout << "Hash map test\n";
+  std::tr1::unordered_set <Vertex, G::vertex_hash> vertex_hash_map;
+  vertex_hash_map.insert (v1);
+  assert (sizeof(int*) == sizeof(size_t));
+  PASSED;
+  
 #endif
 }
 

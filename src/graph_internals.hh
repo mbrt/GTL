@@ -161,10 +161,10 @@ struct compare_out_
 template <typename Descriptor>
 struct _descriptor_hash : public std::unary_function<Descriptor, size_t>
 {
-  std::tr1::hash<unsigned long> __hasher;
+  std::tr1::hash<size_t> __hasher;
 
-  inline size_t operator() (const Descriptor& x) const {
-    return __hasher (reinterpret_cast<unsigned long> (x.internal_value()));
+  size_t operator() (const Descriptor& x) const {
+    return __hasher (reinterpret_cast<size_t> (x.internal_value()));
   }
 };
 
