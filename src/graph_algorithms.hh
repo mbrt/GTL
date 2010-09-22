@@ -55,7 +55,7 @@ struct color_traits
   static default_color_t white() { return white_color; }
   static default_color_t gray()  { return gray_color; }
   static default_color_t black() { return black_color; }
-  static default_color_t red() { return red_color; }
+  static default_color_t red()   { return red_color; }
   static default_color_t green() { return green_color; }
 };
 

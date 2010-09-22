@@ -48,7 +48,6 @@ struct vertex_val {
   
   vertex_val () {}
   vertex_val (int id_) : id(id_) {}
-  
 };
 
 void bgl_adaptor_test ()
@@ -74,7 +73,7 @@ void bgl_adaptor_test ()
   
   std::map <Vertex, int> col_map;
   boost::vertices (graph);
-  boost::breadth_first_search(graph, v, 
+  ::boost::breadth_first_search(graph, v, 
     boost::color_map(boost::std_container_adaptor<std::map<Vertex, int> >(col_map)));
   
   boost::remove_edge (e, graph);

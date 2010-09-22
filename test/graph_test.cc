@@ -564,7 +564,6 @@ struct vertex_val {
   
   vertex_val () {}
   vertex_val (int id_) : id(id_) {}
-  
 };
 
 struct my_bfs_visitor : public gtl::bfs_visitor<gtl::graph_t<vertex_val, int, false> >
