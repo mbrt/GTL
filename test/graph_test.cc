@@ -1,12 +1,12 @@
 // =============================================================================
 // 
-//       Filename:  graph_algorithms.hh
+//       Filename:  graph_test.cc
 // 
-//    Description:  A template set of algorithms for graph classes
+//    Description:  Graph tests
 //
 //         Author:  Michele Bertasi 
 //        Contact:  michele.bertasi@gmail.com
-//      Copyright:  Copyright (c) 2009, Giuseppe Di Guglielmo
+//      Copyright:  Copyright (c) 2010, Michele Bertasi
 //        Company:  University of Verona - ESD Group
 //        License:  GNU Lesser General Public License (GNU LGPL)
 //
@@ -30,7 +30,7 @@
 
 #include "../src/graph.hh"
 #define NEED_GCC_NO_VARIADIC_WORKAOUND
-#include "../src/graph_algorithms.hh"
+#include "../src/graph_algorithm.hh"
 
 #include <cassert>
 #include <boost/foreach.hpp>

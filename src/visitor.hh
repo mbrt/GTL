@@ -1,12 +1,13 @@
 // =============================================================================
 // 
-//       Filename:  graph_algorithms.hh
+//       Filename:  visitor.hh
 // 
-//    Description:  A template set of algorithms for graph classes
+//    Description:  A template set of visitors for graphs, used in the visit
+//                  algorithms
 //
 //         Author:  Michele Bertasi 
 //        Contact:  michele.bertasi@gmail.com
-//      Copyright:  Copyright (c) 2009, Giuseppe Di Guglielmo
+//      Copyright:  Copyright (c) 2010, Michele Bertasi
 //        Company:  University of Verona - ESD Group
 //        License:  GNU Lesser General Public License (GNU LGPL)
 //
@@ -28,106 +29,17 @@
 // 
 // =============================================================================
 
-#ifndef GRAPH_ALGORITHMS_HH
-#define GRAPH_ALGORITHMS_HH
+#ifndef GTL_VISITOR_HH
+#define GTL_VISITOR_HH
 
-#include <tr1/unordered_map>
-#include <tr1/tuple>
-#include <queue>
-#include <map>
-#include <limits>
-
+#include "property_map.hh"
 
 #ifdef NEED_GCC_NO_VARIADIC_WORKAOUND
 #pragma GCC system_header
 #endif
 
+
 namespace gtl {
-
-enum default_color_t { 
-  white_color, gray_color, black_color, green_color, red_color 
-};
-
-/// Default color traits class
-template <typename Color>
-struct color_traits
-{
-  static default_color_t white() { return white_color; }
-  static default_color_t gray()  { return gray_color; }
-  static default_color_t black() { return black_color; }
-  static default_color_t red()   { return red_color; }
-  static default_color_t green() { return green_color; }
-};
-
-
-/// Associates descriptors (vertex or edges) to properties. The property type
-/// must be copy constructible. A copy of the given value is stored in the map.
-/// @tparam Descriptor the descriptor type
-/// @tparam Value the value to be stored for each descriptor
-/// @tparam Map the map type that associates descriptors to values
-template <typename Descriptor,
-          typename Value,
-          typename Map = std::map<Descriptor, Value> >
-class property_map_external_t
-{
-public:
-  typedef Descriptor descriptor_type;
-  typedef Value value_type;
-  typedef Map container_type;
-
-  /// Assign to the descriptor property the given value
-  void put (Descriptor d, Value v)
-  { _map[d] = v; }
-
-  /// Returns the descriptor property (a copy)
-  Value get (Descriptor d)
-  { return _map[d]; }
-
-  Value& operator[] (Descriptor d)
-  { return _map[d]; }
-
-private:
-  Map _map;
-
-};
-
-/// If the vertex (or edge) type is a struct (or a class), this map holds a 
-/// pointer to a given member. When put and get functions are called the value 
-/// stored in the vertex (or the edge) is used. The access time is constant and
-/// consists of one pointer sum and a dereference (therefore in constant time).
-/// It can be used as property map (when possible is suggested to use this class
-/// instead of the property_map_external_t, that uses a map or an hash-map that 
-/// are slower)
-/// @tparam Descriptor the descriptor type
-/// @tparam Value the value to be stored for each descriptor
-/// @tparam Data the type of the vertex (or edge) data stored (it must be a 
-///  struct or a class, that contains the desired member
-template <typename Descriptor,
-          typename Value,
-          typename Data = typename Descriptor::value_type>
-class property_map_internal_t
-{
-public:
-  typedef Descriptor descriptor_type;
-  typedef Value value_type;
-  
-  property_map_internal_t (Value Data::*member) : m_member (member) {}
-
-  /// Assign to the descriptor property the given value
-  void put (Descriptor d, Value v)
-  { (*d).*m_member = v; }
-
-  /// Returns the descriptor property (a copy)
-  Value get (Descriptor d)
-  { return (*d).*m_member; }
-
-  Value& operator[] (Descriptor d)
-  { return (*d).*m_member; }
-
-private:
-  Value Data::*m_member;
-
-};
 
 /// Default BFS visitor. You can inherit from this overriding some operations
 /// called during the BFS visit.
@@ -181,153 +93,6 @@ struct bfs_visitor
   /// (but before the out-edges of the adjacent vertices have been examined). 
   void finish_vertex (Vertex, Graph&) {};
 };
-
-/// Breadth First Search Algorithm (Cormen, Leiserson, and Rivest p. 470)
-///
-/// @tparam Graph the graph type
-/// @tparam BFSVisitor the visitor used uring the visit. This class must match
-///  the bfs_visitor interface
-/// @tparam ColorMap the map that associates a vertex to a color. As default
-///  is used the external color map, that mantain an hash-table from vertex to
-///  colors. If in the vertices data is present a field named color maybe you
-///  want use the color_map_internal_t or an user-define map
-/// @tparam Queue the queue used during the visit
-/// 
-/// @param g the graph
-/// @param s the start vertex
-/// @param vis the visitor used. This class must match the bfs_visitor interface
-/// @param color the color map, that associate a vertex to a color. This class
-///  must match the color_map_external_t (that is equal to the interface of
-///  color_map_internal_t)
-template <typename Graph, 
-          typename BFSVisitor,           
-          typename ColorMap, 
-          typename Queue> 
-void 
-breadth_first_search (Graph& g, 
-                      typename Graph::vertex_descriptor s, 
-                      BFSVisitor vis, 
-                      ColorMap& color_map,
-                      Queue q)
-{
-  typedef typename Graph::vertex_descriptor Vertex;
-  typedef typename Graph::edge_descriptor Edge;
-  typedef typename ColorMap::value_type ColorValue;
-  typedef color_traits<ColorValue> Color;
-
-  typename Graph::vertex_iterator it, end;
-  typename Graph::out_edge_iterator ei, ei_end;
-  
-  std::tr1::tie(it, end) = g.vertices();
-  for (; it != end; ++it) {
-    vis.initialize_vertex (*it, g);   // visitor
-    color_map.put (*it, Color::white());
-  }
-  vis.start_vertex (s, g);            // visitor
-  color_map.put (s, Color::gray());
-  vis.discover_vertex (s, g);         // visitor
-  q.push (s);
-  while (! q.empty()) {
-    Vertex u = q.front();
-    q.pop();
-    vis.examine_vertex (u, g);        // visitor
-    std::tr1::tie(ei, ei_end) = g.out_edges (u);
-    for (; ei != ei_end; ++ei) {
-      Edge e = *ei;
-      Vertex v = g.target (e);
-      vis.examine_edge (e, g);        // visitor
-      ColorValue v_color = color_map.get(v);
-      if (v_color == Color::white()) {
-        vis.tree_edge (e, g);         // visitor
-        color_map.put (v, Color::gray());
-        vis.discover_vertex (v, g);   // visitor
-        q.push (v);
-      }
-      else {
-        vis.non_tree_edge (e, g);     // visitor
-        if (v_color == Color::gray())
-          vis.gray_target (e, g);     // visitor
-        else
-          vis.black_target (e, g);    // visitor
-      }
-    } // end for
-    color_map.put (u, Color::black());
-    vis.finish_vertex (u, g);         // visitor
-  } // end while
-}
-
-/// Breadth First Search Algorithm (Cormen, Leiserson, and Rivest p. 470)
-/// This version use as default the std::queue for the visit.
-///
-/// @tparam Graph the graph type
-/// @tparam BFSVisitor the visitor used uring the visit. This class must match
-///  the bfs_visitor interface
-/// @tparam ColorMap the map that associates a vertex to a color. As default
-///  is used the external color map, that mantain an hash-table from vertex to
-///  colors. If in the vertices data is present a field named color maybe you
-///  want use the color_map_internal_t or an user-define map
-/// 
-/// @param g the graph
-/// @param s the start vertex
-/// @param vis the visitor used. This class must match the bfs_visitor interface
-/// @param color the color map, that associate a vertex to a color. This class
-///  must match the color_map_external_t (that is equal to the interface of
-///  color_map_internal_t)
-template <typename Graph, typename BFSVisitor, typename ColorMap>
-inline void 
-breadth_first_search (Graph& g, 
-                      typename Graph::vertex_descriptor s, 
-                      BFSVisitor vis, 
-                      ColorMap& color)
-{
-  return breadth_first_search (g, s, vis, color, 
-      std::queue<typename Graph::vertex_descriptor>());
-}
-
-/// Breadth First Search Algorithm (Cormen, Leiserson, and Rivest p. 470)
-/// This version use as default the std::queue for the visit and the
-/// color_map_external_t for the vertex coloring.
-///
-/// @tparam Graph the graph type
-/// @tparam BFSVisitor the visitor used uring the visit. This class must match
-///  the bfs_visitor interface
-/// 
-/// @param g the graph
-/// @param s the start vertex
-/// @param vis the visitor used. This class must match the bfs_visitor interface
-template <typename Graph, typename BFSVisitor> 
-inline void 
-breadth_first_search (Graph& g, 
-                      typename Graph::vertex_descriptor s, 
-                      BFSVisitor vis)
-{
-  typedef typename Graph::vertex_descriptor Vertex;
-  property_map_external_t<Vertex, default_color_t> cmap;
-  return breadth_first_search (g, s, vis, cmap,
-      std::queue<Vertex>());
-}
-
-/// Breadth First Search Algorithm (Cormen, Leiserson, and Rivest p. 470)
-/// This version use as default the std::queue for the visit, the
-/// color_map_external_t for the vertex coloring and the bfs_visitor that 
-/// performs no operations during the visit.
-///
-/// @tparam Graph the graph type
-/// 
-/// @param g the graph
-/// @param s the start vertex
-template <typename Graph>
-inline void 
-breadth_first_search (Graph& g, typename Graph::vertex_descriptor s)
-{
-  typedef typename Graph::vertex_descriptor Vertex;
-  property_map_external_t<Vertex, default_color_t> cmap;
-  return breadth_first_search (g, s,
-      bfs_visitor<Graph>(), 
-      cmap,
-      std::queue<Vertex>());
-}
-
 
 // --------------------------------- impl --------------------------------------
 namespace impl {
@@ -575,9 +340,7 @@ record_bfs_distances (const Graph&, DistanceMap& dmap) {
   return bfs_distance_recorder<Graph, DistanceMap> (dmap);
 }
 
-// ===================== template implementation ===============================
-
 
 } // namespace gtl
 
-#endif
+#endif  // GTL_VISITOR_HH

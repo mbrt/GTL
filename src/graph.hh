@@ -1,8 +1,9 @@
 // =============================================================================
 // 
-//       Filename:  bgl_adaptor.hh
+//       Filename:  graph.hh
 // 
-//    Description:  A template set of algorithms for graph classes
+//    Description:  The graph.hh library for c++ provides an STL-like container 
+//                  for graphs.
 //
 //         Author:  Michele Bertasi 
 //        Contact:  michele.bertasi@gmail.com
@@ -28,8 +29,8 @@
 // 
 // =============================================================================
 
-#ifndef GRAPH_T_HH
-#define GRAPH_T_HH
+#ifndef GTL_GRAPH_T_HH
+#define GTL_GRAPH_T_HH
 
 #include "graph_internals.hh"
 
@@ -883,4 +884,4 @@ graph_edge_t_ (const vertex_descriptor& source,
 
 } // namespace gtl
 
-#endif
+#endif  // GTL_GRAPH_T_HH
