@@ -87,7 +87,7 @@ void bgl_adaptor_test ()
 
 void bgl_topo_sort_test()
 {
-  typedef gtl::graph_t<const char*, gtl::NoData> G;
+  typedef gtl::graph_t<const char*, gtl::no_data> G;
   typedef G::vertex_descriptor Vertex;
   G graph;
   

@@ -658,7 +658,7 @@ int main ()
   algorithms_test();
   
   // NO DATA GRAPH  
-  typedef gtl::graph_t<gtl::NoData, gtl::NoData, false> NDG;
+  typedef gtl::graph_t<gtl::no_data, gtl::no_data, false> NDG;
   NDG no_data_graph;
   NDG::vertex_descriptor ndv = no_data_graph.add_vertex();
   no_data_graph.add_edge (ndv, ndv);
