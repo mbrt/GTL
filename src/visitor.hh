@@ -6,7 +6,7 @@
 //                  algorithms
 //
 //         Author:  Michele Bertasi 
-//        Contact:  michele.bertasi@gmail.com
+//        Contact:  michele.bertasi $at$ gmail.com
 //      Copyright:  Copyright (c) 2010, Michele Bertasi
 //        Company:  University of Verona - ESD Group
 //        License:  GNU Lesser General Public License (GNU LGPL)

@@ -6,7 +6,7 @@
 //                  for graphs.
 //
 //         Author:  Michele Bertasi 
-//        Contact:  michele.bertasi@gmail.com
+//        Contact:  michele.bertasi $at$ studenti.univr.it
 //      Copyright:  Copyright (c) 2010, Michele Bertasi
 //        Company:  University of Verona - ESD Group
 //        License:  GNU Lesser General Public License (GNU LGPL)
@@ -52,10 +52,10 @@ namespace gtl
 /// possibility to permits parallel edges or not.
 /// 
 /// @tparam Vdata the data stored in the vertices. You can provide the special
-///  value NoData. To get the data stored use the operator* or -> provided by
+///  value no_data. To get the data stored use the operator* or -> provided by
 ///  the vertex_descriptor.
 /// @tparam Edata the data stored in the edges. You can provide the special
-///  value NoData. To get the data stored use the operator* or -> provided by
+///  value no_data. To get the data stored use the operator* or -> provided by
 ///  the edge_descriptor.
 /// @tparam parallel if is set to true the graph allows parallel edges. In this
 ///  case between two vertices can be more than one edge. If is set to false
@@ -66,8 +66,8 @@ namespace gtl
 ///  allocation model. By default, the std::allocator class template is used,
 ///  which defines the simplest memory allocation model and is value-independent.
 ///
-template <typename Vdata = NoData, 
-          typename Edata = NoData, 
+template <typename Vdata = no_data, 
+          typename Edata = no_data, 
           bool parallel = false,
           typename Allocator = std::allocator<void> >
 class graph_t

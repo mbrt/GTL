@@ -1,12 +1,12 @@
 // =============================================================================
 // 
-//       Filename:  graph_algorithms.hh
+//       Filename:  graph_internals.hh
 // 
-//    Description:  A template set of algorithms for graph classes
+//    Description:  Internal header for graph_t class
 //
 //         Author:  Michele Bertasi 
-//        Contact:  michele.bertasi@gmail.com
-//      Copyright:  Copyright (c) 2009, Giuseppe Di Guglielmo
+//        Contact:  michele.bertasi $at$ gmail.com
+//      Copyright:  Copyright (c) 2010, Michele Bertasi
 //        Company:  University of Verona - ESD Group
 //        License:  GNU Lesser General Public License (GNU LGPL)
 //
@@ -28,8 +28,8 @@
 // 
 // =============================================================================
 
-#ifndef GRAPH_INTERNALS_HH
-#define GRAPH_INTERNALS_HH
+#ifndef GTL_GRAPH_INTERNALS_HH
+#define GTL_GRAPH_INTERNALS_HH
 
 #include <set>
 #include <list>
@@ -48,7 +48,7 @@ template <typename Edata, typename Config>
 class graph_edge_t_;
 
 /// An empty struct that contains no data
-struct NoData {};
+struct no_data {};
 
 /// Used for internal graph data types and functions
 namespace impl {
@@ -343,13 +343,13 @@ protected:
 
 };
 
-/// Specialization for descriptors in wich the value stored is NoData.
+/// Specialization for descriptors in wich the value stored is no_data.
 /// No operator * and -> are provided.
 /// @tparam _Iterator the base iterator stored.
 template <typename _Iterator>
-class descriptor_base_<NoData, _Iterator> : private _Iterator
+class descriptor_base_<no_data, _Iterator> : private _Iterator
 {
-  typedef descriptor_base_<NoData, _Iterator> self;
+  typedef descriptor_base_<no_data, _Iterator> self;
   typedef _Iterator Base;
 
   template <typename Vdata, typename Edata, bool parallel, typename Allocator>
