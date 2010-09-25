@@ -9,3 +9,19 @@ This library was succesfully compiled with g++ ver. 4.3.2 with this cmd line
 options:
 
 > g++ -Wall -Wextra -pedantic -ggdb -std=c++0x graph_test.cc
+
+
+The CMake build system is only used to perform some cheks on the gtl template
+library. If you only want to use the library you may prefer to copy only the
+header files (situated in ./src). You can use the test files as exmples for
+the library.
+NOTE: the boost library is used to make some checks in the test files. If
+you don't have it don't worry: the gtl library works only with the standard
+library, you don't have to install the boost library to use it.
+
+To make and run the tests:
+
+> cd build
+> cmake -C ..
+> make
+> make test

@@ -29,7 +29,6 @@
 // =============================================================================
 
 #include "../src/graph.hh"
-#define NEED_GCC_NO_VARIADIC_WORKAOUND
 #include "../src/graph_algorithm.hh"
 
 #include <cassert>
