@@ -123,7 +123,16 @@ void algorithms_test ()
   assert (v1->color == Color::green());
   PASSED;
   
-  gtl::make_dfs_visitor (gtl::dfs_visitor<G>(), gtl::dfs_visitor<G>());
+  std::cout << "DFS visit\n";
+  gtl::make_dfs_visitor (gtl::record_dfs_predecessors(graph, pred_map), 
+                         gtl::record_dfs_distances(graph, dist_map));
+  
+  gtl::property_map_external_t<Vertex, size_t> time_map;
+  gtl::dfs_time_stamper<G> time_st (time_map, time_map);
+  
+  time_st.discover_vertex (v1, graph);
+  time_st.finish_vertex (v1, graph);
+  gtl::stamp_dfs_times (graph, time_map, time_map);
 }
 
 

@@ -355,6 +355,25 @@ struct bfs_predecessor_recorder
   bfs_predecessor_recorder (PredecessorMap& pmap) : Base (pmap) {}
 };
 
+/// This is a visitor that records the predecessor (or parent) of a vertex 
+/// in a predecessor property map. This is particularly useful in graph search
+/// algorithms where recording the predecessors is an efficient way to encode 
+/// the search tree that was traversed during the search.
+/// @tparam Graph the graph
+/// @tparam PredecessorMap the map that associate each vertex to its 
+///  predecessor
+template <typename Graph, 
+          typename PredecessorMap = 
+            property_map_external_t<typename Graph::vertex_descriptor,
+                                    typename Graph::vertex_descriptor> >
+struct dfs_predecessor_recorder 
+  : public predecessor_recorder <dfs_visitor<Graph>, PredecessorMap>
+{ 
+  typedef predecessor_recorder <dfs_visitor<Graph>, PredecessorMap> Base;
+
+  dfs_predecessor_recorder (PredecessorMap& pmap) : Base (pmap) {}
+};
+
 /// This function returns a visitor that records the predecessor (or parent) of 
 /// a vertex in a predecessor property map. This is particularly useful in 
 /// graph search algorithms where recording the predecessors is an efficient 
@@ -383,6 +402,20 @@ record_bfs_predecessors (const Graph&, PredecessorMap& pmap) {
   return bfs_predecessor_recorder<Graph, PredecessorMap> (pmap);
 }
 
+/// This function returns a dfs visitor that records the predecessor (or 
+/// parent) of a vertex in a predecessor property map. This is particularly 
+/// useful in graph search algorithms where recording the predecessors is an 
+/// efficient way to encode the search tree that was traversed during the 
+/// search.
+/// @param g the graph to visit. This parameter is only used to determine the
+///  type of the graph. You can provide also an other graph of the same type.
+/// @param pmap the map that associates each vertex to its predecessor (for
+///  example you may use the default_property_map
+template <typename Graph, typename PredecessorMap>
+inline dfs_predecessor_recorder <Graph, PredecessorMap>
+record_dfs_predecessors (const Graph&, PredecessorMap& pmap) {
+  return dfs_predecessor_recorder<Graph, PredecessorMap> (pmap);
+}
 
 template <typename BaseVisitor,
           typename DistanceMap = 
@@ -433,6 +466,24 @@ struct bfs_distance_recorder
   bfs_distance_recorder (DistanceMap& dmap) : Base (dmap) {}
 };
 
+/// This is an EventVisitor that records the distance of a vertex (using a 
+/// property map) from some source vertex during a graph search. When applied 
+/// to edge e = (u,v), the distance of v is recorded to be one more than the 
+/// distance of u.
+/// @tparam Graph the graph
+/// @tparam DistanceMap the map that associate each vertex to its predecessor
+///  distance
+template <typename Graph, 
+          typename DistanceMap = 
+            property_map_external_t<typename Graph::vertex_descriptor, size_t> >
+struct dfs_distance_recorder 
+  : public distance_recorder <dfs_visitor<Graph>, DistanceMap>
+{
+  typedef distance_recorder <dfs_visitor<Graph>, DistanceMap> Base;
+
+  dfs_distance_recorder (DistanceMap& dmap) : Base (dmap) {}
+};
+
 /// This function returns a visitor that records the distance of a vertex (using
 /// a property map) from some source vertex during a graph search. When applied 
 /// to edge e = (u,v), the distance of v is recorded to be one more than the 
@@ -464,6 +515,84 @@ template <typename Graph, typename DistanceMap>
 inline bfs_distance_recorder <Graph, DistanceMap>
 record_bfs_distances (const Graph&, DistanceMap& dmap) {
   return bfs_distance_recorder<Graph, DistanceMap> (dmap);
+}
+
+/// This function returns a dfs  visitor that records the distance of a vertex 
+/// (using a property map) from some source vertex during a graph search. When 
+/// applied to edge e = (u,v), the distance of v is recorded to be one more 
+/// than the distance of u.
+/// All the vertices not reached by the visit has the distance equal to the 
+/// maximum value of the distance type, and the start vertex is setted with
+/// distance zero.
+/// @param g the graph to visit. This parameter is only used to determine the
+///  type of the graph. You can provide also an other graph of the same type, 
+///  no copies nor references are taken from this parameter.
+/// @param dmap the map the map that associate each vertex to its predecessor
+///  distance
+template <typename Graph, typename DistanceMap>
+inline dfs_distance_recorder <Graph, DistanceMap>
+record_dfs_distances (const Graph&, DistanceMap& dmap) {
+  return dfs_distance_recorder<Graph, DistanceMap> (dmap);
+}
+
+
+template <typename BaseVisitor,
+          typename TimeMap = 
+            property_map_external_t<typename BaseVisitor::Vertex, size_t>,
+          typename Time = typename TimeMap::value_type>
+class time_stamper
+  : public BaseVisitor
+{
+
+public:
+  /// Increments the time counter and record the discover time of the vertex
+  void discover_vertex (typename BaseVisitor::Vertex v,
+                        typename BaseVisitor::Graph&) {
+    _dtime_map.put (v, ++t);
+  }
+
+  /// Increments the time counter and record the finish time of the vertex
+  void finish_vertex (typename BaseVisitor::Vertex v,
+                      typename BaseVisitor::Graph&) {
+    _ftime_map.put (v, ++t);
+  }
+
+  /// Constructor
+  /// @param dtime_map the discover time map
+  /// @param ftime_map the finish time map
+  time_stamper (TimeMap& dtime_map, TimeMap& ftime_map) 
+    : _dtime_map(dtime_map), _ftime_map(ftime_map), t(0) { }
+
+protected:
+  TimeMap& _dtime_map;
+  TimeMap& _ftime_map;
+  Time t;
+};
+
+/// This is an EventVisitor that records the discovering and the finish time 
+/// stamp of each vertex (using two property map) during a graph search. 
+/// When applied to vertex v, the time counter is incremented, and stored in 
+/// the correct time map (discover or finish).
+/// @tparam Graph the graph
+/// @tparam TimeMap the map that associate each vertex to its time stamp
+/// @tparam Time the time type
+template <typename Graph,
+          typename TimeMap = 
+            property_map_external_t<typename Graph::vertex_descriptor, size_t>,
+          typename Time = typename TimeMap::value_type>
+struct dfs_time_stamper 
+  : public time_stamper <dfs_visitor<Graph>, TimeMap, Time>
+{
+  typedef time_stamper <dfs_visitor<Graph>, TimeMap, Time> Base;
+
+  dfs_time_stamper (TimeMap& dtime_map, TimeMap& ftime_map)
+    : Base (dtime_map, ftime_map) { }
+};
+
+template <typename Graph, typename TimeMap>
+inline dfs_time_stamper <Graph, TimeMap>
+stamp_dfs_times (const Graph&, TimeMap& dtime_map, TimeMap& ftime_map) {
+  return dfs_time_stamper<Graph, TimeMap> (dtime_map, ftime_map);
 }
 
 

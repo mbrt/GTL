@@ -120,6 +120,38 @@ private:
 
 };
 
+namespace impl {
+  struct dummy_pmap_reference {
+    template <class T>
+    dummy_pmap_reference& operator=(const T&) { return *this; }
+    operator int() { return 0; }
+  };
+}
+
+/// A property map that does not do anything, for when you have to supply
+/// a property map, but don't need it.
+class dummy_property_map 
+{
+public:
+  typedef void key_type; 
+  typedef int value_type;
+  typedef impl::dummy_pmap_reference reference;
+  
+  dummy_property_map() { }
+  dummy_property_map(value_type) { }
+  dummy_property_map(const dummy_property_map&) { }
+
+  template <typename Descriptor>
+  reference operator[](Descriptor) const { return reference(); }
+
+  template <typename Descriptor, typename Value>
+  void put (Descriptor, Value) { }
+
+  template <typename Descriptor>
+  value_type get (Descriptor) { return value_type(); }
+};
+
+
 } // namespace gtl
 
 #endif // GTL_PROPERTY_MAP_HH
