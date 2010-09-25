@@ -29,8 +29,6 @@
 // =============================================================================
 
 #include "../src/graph.hh"
-#define NEED_GCC_NO_VARIADIC_WORKAOUND
-#include "../src/graph_algorithm.hh"
 
 #include <cassert>
 #include <boost/foreach.hpp>
@@ -564,89 +562,6 @@ void graph_test ()
 #endif
 }
 
-struct vertex_val {
-  gtl::default_color_t color;
-  int id;
-  
-  vertex_val () {}
-  vertex_val (int id_) : id(id_) {}
-};
-
-struct my_bfs_visitor : public gtl::bfs_visitor<gtl::graph_t<vertex_val, int, false> >
-{
-  void discover_vertex (Vertex u, Graph&) {
-    int id = u->id;
-    assert (id != 3);
-  }
-  
-  void tree_edge (Edge e, Graph&) {
-    assert (*e == 1);
-  }
-  
-  void gray_target (Edge e, Graph& g) {
-    assert (*e == 1 && g.target(e)->id == 1);
-  }
-  
-  void finish_vertex (Vertex v, Graph&) {
-    std::cout << "Color of: " << v->id << " = " << v->color << std::endl;
-    assert (v->color == gtl::color_traits<gtl::default_color_t>::black());
-  }
-  
-};
-
-struct printer_bfs_visitor : public gtl::bfs_visitor<gtl::graph_t<vertex_val, int, false> >
-{
-  void discover_vertex (Vertex u, Graph&) {
-    std::cout << "Discover vertex " << u->id << std::endl;
-  }
-};
-
-
-void algorithms_test () 
-{
-  typedef gtl::graph_t<vertex_val, int, false> G;
-  typedef G::vertex_descriptor Vertex;
-  G graph;
-  
-  std::cout << "Color map\n";
-  gtl::property_map_external_t<Vertex, gtl::default_color_t> col_map;
-  typedef gtl::color_traits<gtl::default_color_t> Color;
-  Vertex v1 = graph.add_vertex (1);
-  col_map.put (v1, Color::black());
-  assert (col_map.get (v1) == Color::black());
-  PASSED;
-  
-  std::cout << "BFS visit\n";
-  Vertex v2 = graph.add_vertex (2);
-  Vertex v3 = graph.add_vertex (3);
-  graph.add_edge (v1, v2, 1);
-  graph.add_edge (v2, v1, 2);
-  my_bfs_visitor my_v;
-  printer_bfs_visitor printer_v;
-  gtl::property_map_internal_t<Vertex, gtl::default_color_t> 
-    color_map (&vertex_val::color);
-  gtl::property_map_external_t<Vertex, Vertex> pred_map;
-  gtl::property_map_external_t<Vertex, size_t> dist_map;
-  gtl::breadth_first_search (graph, v1, 
-    gtl::make_bfs_visitor (my_v, printer_v, 
-      gtl::record_bfs_predecessors(graph, pred_map),
-      gtl::record_bfs_distances(graph, dist_map)),
-    color_map);
-  assert (color_map.get(v1) == Color::black());
-  assert (color_map.get(v2) == Color::black());
-  assert (color_map.get(v3) == Color::white());
-  assert (pred_map.get(v2) == v1);
-  assert (dist_map.get(v1) == 0);
-  assert (dist_map.get(v2) == 1);
-  assert (dist_map.get(v3) == std::numeric_limits<size_t>::max());
-  PASSED;
-  
-  gtl::default_color_t vertex_val::*pointer;
-  pointer = &vertex_val::color;
-  (*v1).*pointer = Color::green();
-  assert (v1->color == Color::green());
-}
-
 
 int main ()
 { 
@@ -654,8 +569,6 @@ int main ()
   multigraph_test();
   std::cout << "GRAPH WITH NO PARALLEL EDGES\n";
   graph_test();
-  std::cout << "ALGORITHMS TEST\n";
-  algorithms_test();
   
   // NO DATA GRAPH  
   typedef gtl::graph_t<gtl::no_data, gtl::no_data, false> NDG;
@@ -664,8 +577,8 @@ int main ()
   no_data_graph.add_edge (ndv, ndv);
   
   std::cout << "All the tests were passed\n";
+  return 0;
   
-   
 //  // BOOST GRAPH
 //  typedef boost::adjacency_list<boost::multisetS, boost::listS, boost::bidirectionalS> BG;
 //  typedef boost::graph_traits<BG>::vertex_descriptor BVertex;

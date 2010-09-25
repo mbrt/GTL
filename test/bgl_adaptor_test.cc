@@ -30,6 +30,7 @@
 
 #include "../src/graph.hh"
 #include "../src/bgl_adaptor.hh"
+#include "../src/property_map.hh"
 
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/topological_sort.hpp>
@@ -74,7 +75,7 @@ void bgl_adaptor_test ()
   std::map <Vertex, int> col_map;
   boost::vertices (graph);
   ::boost::breadth_first_search(graph, v, 
-    boost::color_map(boost::std_container_adaptor<std::map<Vertex, int> >(col_map)));
+    boost::color_map(boost::associative_property_map<std::map<Vertex, int> >(col_map)));
   
   boost::remove_edge (e, graph);
   boost::remove_edge (v, v, graph);
@@ -108,11 +109,11 @@ void bgl_topo_sort_test()
   boost::add_edge (vert[4], vert[6], graph);
   boost::add_edge (vert[5], vert[6], graph);
   
-  std::map <Vertex, int> col_map;
+  gtl::property_map_external_t<Vertex, gtl::default_color_t> col_map;
   std::deque<Vertex> topo_order;
   
   boost::topological_sort (graph, std::front_inserter (topo_order),
-    boost::color_map(boost::std_container_adaptor<std::map<Vertex, int> >(col_map)));
+    boost::color_map(boost::make_gtl_map_adaptor(col_map)));
   
   int n = 1;
   for (std::deque<Vertex>::iterator it = topo_order.begin();

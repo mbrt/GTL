@@ -33,9 +33,11 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/property_map.hpp>
+#include <boost/graph/properties.hpp>
 #include <utility>
 
 #include "graph.hh"
+#include "property_map.hh"
 
 
 // The functions and classes in this file allows the user to
@@ -247,26 +249,51 @@ remove_edge (
 
 // ---------------------------- property map ----------------------------------
 
-template <typename Container>
-class std_container_adaptor
-  : public put_get_helper <typename Container::value_type::second_type&, 
-                           std_container_adaptor<Container> >
+
+/// This adaptor can be passed as property map to a boost graph library 
+/// algorithm. Internally store a pointer to a gtl property map.
+/// @tparam Container the container type
+template <typename GtlMap>
+class gtl_map_adaptor
+  : public put_get_helper <typename GtlMap::value_type&, 
+                           gtl_map_adaptor<GtlMap> >
 {
 public:
   typedef lvalue_property_map_tag category;
-  typedef typename Container::key_type key_type;
-  typedef typename Container::value_type::second_type value_type;
+  typedef typename GtlMap::key_type key_type;
+  typedef typename GtlMap::value_type value_type;
   typedef value_type& reference;
   
-  std_container_adaptor () : m_c(NULL) {}
-  std_container_adaptor (Container& c) : m_c(&c) {}
+  gtl_map_adaptor () : m_c(NULL) {}
+  gtl_map_adaptor (GtlMap& c) : m_c(&c) {}
 
   reference operator[] (const key_type& k) const {
     return (*m_c)[k];
   }
 
 private:
-  Container* m_c;
+  GtlMap* m_c;
+};
+
+
+/// Returns an adaptor from a gtl property map to a bgl property map. The 
+/// returned map can be used in any algorithm in the boost graph library.
+/// @param gtl_pmap the gtl property map to pass
+template <typename GtlMap>
+inline gtl_map_adaptor<GtlMap>
+make_gtl_map_adaptor (GtlMap& gtl_pmap) {
+  return gtl_map_adaptor<GtlMap> (gtl_pmap);
+}
+
+/// Default color traits class
+template <>
+struct color_traits<gtl::default_color_t>
+{
+  static gtl::default_color_t white() { return gtl::white_color; }
+  static gtl::default_color_t gray()  { return gtl::gray_color; }
+  static gtl::default_color_t black() { return gtl::black_color; }
+  static gtl::default_color_t red()   { return gtl::red_color; }
+  static gtl::default_color_t green() { return gtl::green_color; }
 };
 
 

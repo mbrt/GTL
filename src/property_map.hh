@@ -62,7 +62,7 @@ template <typename Descriptor,
 class property_map_external_t
 {
 public:
-  typedef Descriptor descriptor_type;
+  typedef Descriptor key_type;
   typedef Value value_type;
   typedef Map container_type;
 
@@ -99,7 +99,7 @@ template <typename Descriptor,
 class property_map_internal_t
 {
 public:
-  typedef Descriptor descriptor_type;
+  typedef Descriptor key_type;
   typedef Value value_type;
   
   property_map_internal_t (Value Data::*member) : m_member (member) {}
