@@ -137,6 +137,12 @@ public:
   typedef int value_type;
   typedef impl::dummy_pmap_reference reference;
   
+  /// Returns a reference to a dummy property map
+  static dummy_property_map& instance() {
+    static dummy_property_map dummy;
+    return dummy;
+  }
+
   dummy_property_map() { }
   dummy_property_map(value_type) { }
   dummy_property_map(const dummy_property_map&) { }

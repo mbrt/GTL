@@ -100,11 +100,13 @@ void algorithms_test ()
     color_map (&vertex_val::color);
   gtl::property_map_external_t<Vertex, Vertex> pred_map;
   gtl::property_map_external_t<Vertex, size_t> dist_map;
+  gtl::property_map_external_t<Vertex, size_t> dtime_map, ftime_map, time_map;
   
   gtl::breadth_first_search (graph, v1, 
     gtl::make_bfs_visitor (my_v, printer_v, 
       gtl::record_bfs_predecessors(graph, pred_map),
-      gtl::record_bfs_distances(graph, dist_map)),
+      gtl::record_bfs_distances(graph, dist_map),
+      gtl::stamp_bfs_times(graph, dtime_map, ftime_map)),
     color_map);
   
   assert (color_map.get(v1) == Color::black());
@@ -114,6 +116,10 @@ void algorithms_test ()
   assert (dist_map.get(v1) == 0);
   assert (dist_map.get(v2) == 1);
   assert (dist_map.get(v3) == std::numeric_limits<size_t>::max());
+  
+  std::cout << "v1 time: [" << dtime_map.get(v1) << ", " << ftime_map.get(v1) << "]\n";
+  std::cout << "v2 time: [" << dtime_map.get(v2) << ", " << ftime_map.get(v2) << "]\n";
+  std::cout << "v3 time: [" << dtime_map.get(v3) << ", " << ftime_map.get(v3) << "]\n";
   PASSED;
   
   std::cout << "Color map internal\n";
@@ -127,7 +133,7 @@ void algorithms_test ()
   gtl::make_dfs_visitor (gtl::record_dfs_predecessors(graph, pred_map), 
                          gtl::record_dfs_distances(graph, dist_map));
   
-  gtl::property_map_external_t<Vertex, size_t> time_map;
+  
   gtl::dfs_time_stamper<G> time_st (time_map, time_map);
   
   time_st.discover_vertex (v1, graph);

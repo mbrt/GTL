@@ -537,9 +537,10 @@ record_dfs_distances (const Graph&, DistanceMap& dmap) {
 
 
 template <typename BaseVisitor,
-          typename TimeMap = 
+          typename DTimeMap = 
             property_map_external_t<typename BaseVisitor::Vertex, size_t>,
-          typename Time = typename TimeMap::value_type>
+          typename FTimeMap = DTimeMap,
+          typename Time = typename DTimeMap::value_type>
 class time_stamper
   : public BaseVisitor
 {
@@ -560,39 +561,99 @@ public:
   /// Constructor
   /// @param dtime_map the discover time map
   /// @param ftime_map the finish time map
-  time_stamper (TimeMap& dtime_map, TimeMap& ftime_map) 
+  time_stamper (DTimeMap& dtime_map, FTimeMap& ftime_map) 
     : _dtime_map(dtime_map), _ftime_map(ftime_map), t(0) { }
 
 protected:
-  TimeMap& _dtime_map;
-  TimeMap& _ftime_map;
+  DTimeMap& _dtime_map;
+  FTimeMap& _ftime_map;
   Time t;
 };
 
 /// This is an EventVisitor that records the discovering and the finish time 
-/// stamp of each vertex (using two property map) during a graph search. 
+/// stamp of each vertex (using two property map) during a dfs graph search. 
 /// When applied to vertex v, the time counter is incremented, and stored in 
 /// the correct time map (discover or finish).
 /// @tparam Graph the graph
-/// @tparam TimeMap the map that associate each vertex to its time stamp
+/// @tparam DTimeMap the map that associate each vertex to its discover time 
+///  stamp
+/// @tparam FTimeMap the map that associate each vertex to its finish time 
+///  stamp
 /// @tparam Time the time type
 template <typename Graph,
-          typename TimeMap = 
+          typename DTimeMap = 
             property_map_external_t<typename Graph::vertex_descriptor, size_t>,
-          typename Time = typename TimeMap::value_type>
+          typename FTimeMap = DTimeMap,
+          typename Time = typename DTimeMap::value_type>
 struct dfs_time_stamper 
-  : public time_stamper <dfs_visitor<Graph>, TimeMap, Time>
+  : public time_stamper <dfs_visitor<Graph>, DTimeMap, FTimeMap, Time>
 {
-  typedef time_stamper <dfs_visitor<Graph>, TimeMap, Time> Base;
+  typedef time_stamper <dfs_visitor<Graph>, DTimeMap, FTimeMap, Time> Base;
 
-  dfs_time_stamper (TimeMap& dtime_map, TimeMap& ftime_map)
+  dfs_time_stamper (DTimeMap& dtime_map, FTimeMap& ftime_map)
     : Base (dtime_map, ftime_map) { }
 };
 
-template <typename Graph, typename TimeMap>
-inline dfs_time_stamper <Graph, TimeMap>
-stamp_dfs_times (const Graph&, TimeMap& dtime_map, TimeMap& ftime_map) {
-  return dfs_time_stamper<Graph, TimeMap> (dtime_map, ftime_map);
+/// This is an EventVisitor that records the discovering and the finish time 
+/// stamp of each vertex (using two property map) during a bfs graph search. 
+/// When applied to vertex v, the time counter is incremented, and stored in 
+/// the correct time map (discover or finish).
+/// @tparam Graph the graph
+/// @tparam DTimeMap the map that associate each vertex to its discover time 
+///  stamp
+/// @tparam FTimeMap the map that associate each vertex to its finish time 
+///  stamp
+/// @tparam Time the time type
+template <typename Graph,
+          typename DTimeMap = 
+            property_map_external_t<typename Graph::vertex_descriptor, size_t>,
+          typename FTimeMap = DTimeMap,
+          typename Time = typename DTimeMap::value_type>
+struct bfs_time_stamper 
+  : public time_stamper <bfs_visitor<Graph>, DTimeMap, FTimeMap, Time>
+{
+  typedef time_stamper <bfs_visitor<Graph>, DTimeMap, FTimeMap, Time> Base;
+
+  bfs_time_stamper (DTimeMap& dtime_map, FTimeMap& ftime_map)
+    : Base (dtime_map, ftime_map) { }
+};
+
+/// This function returns a dfs visitor that records the discovering and the 
+/// finish time stamp of each vertex (using two property map) during a graph 
+/// search. When applied to vertex v, the time counter is incremented, and 
+/// stored in the correct time map (discover or finish).
+/// @param g the graph to visit. This parameter is only used to determine the
+///  type of the graph. You can provide also an other graph of the same type, 
+///  no copies nor references are taken from this parameter.
+/// @param dtime_map the map that associate each vertex to its discover time 
+///  stamp. You can provide the special map dummy_property_map if you don't 
+///  care this value.
+/// @param ftime_map the map that associate each vertex to its finish time 
+///  stamp. You can provide the special map dummy_property_map if you don't 
+///  care this value.
+template <typename Graph, typename DTimeMap, typename FTimeMap>
+inline dfs_time_stamper <Graph, DTimeMap, FTimeMap>
+stamp_dfs_times (const Graph&, DTimeMap& dtime_map, FTimeMap& ftime_map) {
+  return dfs_time_stamper<Graph, DTimeMap, FTimeMap> (dtime_map, ftime_map);
+}
+
+/// This function returns a dfs visitor that records the discovering and the 
+/// finish time stamp of each vertex (using two property map) during a graph 
+/// search. When applied to vertex v, the time counter is incremented, and 
+/// stored in the correct time map (discover or finish).
+/// @param g the graph to visit. This parameter is only used to determine the
+///  type of the graph. You can provide also an other graph of the same type, 
+///  no copies nor references are taken from this parameter.
+/// @param dtime_map the map that associate each vertex to its discover time 
+///  stamp. You can provide the special map dummy_property_map if you don't 
+///  care this value.
+/// @param ftime_map the map that associate each vertex to its finish time 
+///  stamp. You can provide the special map dummy_property_map if you don't 
+///  care this value.
+template <typename Graph, typename DTimeMap, typename FTimeMap>
+inline bfs_time_stamper <Graph, DTimeMap, FTimeMap>
+stamp_bfs_times (const Graph&, DTimeMap& dtime_map, FTimeMap& ftime_map) {
+  return bfs_time_stamper<Graph, DTimeMap, FTimeMap> (dtime_map, ftime_map);
 }
 
 
