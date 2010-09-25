@@ -34,6 +34,7 @@
 #include <tr1/tuple>
 #include <queue>
 #include <limits>
+#include <stack>
 
 #include "property_map.hh"
 #include "visitor.hh"
@@ -55,10 +56,13 @@ namespace gtl {
 /// 
 /// @param g the graph
 /// @param s the start vertex
-/// @param vis the visitor used. This class must match the bfs_visitor interface
+/// @param vis the visitor used (a copy). This class must match the bfs_visitor 
+///  interface. If you want to use a reference to a visitor use std::ref 
+///  utility function.
 /// @param color the color map, that associate a vertex to a color. This class
 ///  must match a property_map interface that associate a vertex descriptor with
 ///  a color (for example default_color_t).
+/// @param q the queue used during the visit
 template <typename Graph, 
           typename BFSVisitor,           
           typename ColorMap, 
@@ -129,7 +133,9 @@ breadth_first_search (Graph& g,
 /// 
 /// @param g the graph
 /// @param s the start vertex
-/// @param vis the visitor used. This class must match the bfs_visitor interface
+/// @param vis the visitor used (a copy). This class must match the bfs_visitor 
+///  interface. If you want to use a reference to a visitor use std::ref 
+///  utility function.
 /// @param color the color map, that associate a vertex to a color. This class
 ///  must match a property_map interface that associate a vertex descriptor with
 ///  a color (for example default_color_t).
@@ -146,7 +152,7 @@ breadth_first_search (Graph& g,
 
 /// Breadth First Search Algorithm (Cormen, Leiserson, and Rivest p. 470)
 /// This version use as default the std::queue for the visit and the
-/// color_map_external_t for the vertex coloring.
+/// proeperty_map_external_t for the vertex coloring.
 ///
 /// @tparam Graph the graph type
 /// @tparam BFSVisitor the visitor used uring the visit. This class must match
@@ -154,7 +160,9 @@ breadth_first_search (Graph& g,
 /// 
 /// @param g the graph
 /// @param s the start vertex
-/// @param vis the visitor used. This class must match the bfs_visitor interface
+/// @param vis the visitor used (a copy). This class must match the bfs_visitor 
+///  interface. If you want to use a reference to a visitor use std::ref 
+///  utility function.
 template <typename Graph, typename BFSVisitor> 
 inline void 
 breadth_first_search (Graph& g, 
@@ -169,7 +177,7 @@ breadth_first_search (Graph& g,
 
 /// Breadth First Search Algorithm (Cormen, Leiserson, and Rivest p. 470)
 /// This version use as default the std::queue for the visit, the
-/// color_map_external_t for the vertex coloring and the bfs_visitor that 
+/// property_map_external_t for the vertex coloring and the bfs_visitor that 
 /// performs no operations during the visit.
 ///
 /// @tparam Graph the graph type
@@ -188,10 +196,123 @@ breadth_first_search (Graph& g, typename Graph::vertex_descriptor s)
       std::queue<Vertex>());
 }
 
+namespace impl {
+
+template <typename Vertex, typename Iter>
+struct context_info {
+  typedef std::pair<Iter, Iter> Range;
+
+  Vertex vertex;
+  Range range;
+
+  context_info () : vertex(), range() {}
+  context_info (Vertex v, const Range& r) : vertex(v), range(r) {}
+};
 
 
+/// The dfs visit implementation is not recursive. Here a stack is used as
+/// context switch when the algorithm back track after the finish of a 
+/// vertex visit (and its successors).
+template <typename Graph, typename DFSVisitor, typename ColorMap>
+void dfs_visit (Graph& g, DFSVisitor& vis, ColorMap& color_map,
+                typename Graph::vertex_descriptor u)
+{
+  typedef typename Graph::vertex_descriptor Vertex;
+  typedef typename Graph::edge_descriptor Edge;
+  typedef typename ColorMap::value_type ColorValue;
+  typedef color_traits<ColorValue> Color;
+  typedef context_info<Vertex, typename Graph::out_edge_iterator> Info;
+  
+  typename Graph::out_edge_iterator ei, ei_end;
+  Edge e;
+  std::stack<Info> stack;
 
-// ===================== template implementation ===============================
+  vis.start_vertex (u, g);
+  color_map.put (u, Color::gray());
+  vis.discover_vertex (u, g);
+  stack.push (Info(u, g.out_edges(u)));
+
+  while (! stack.empty()) {
+    Info& context = stack.top();
+    u = context.vertex;
+    std::tr1::tie (ei, ei_end) = context.range;
+    stack.pop();
+    while (ei != ei_end) {
+      e = *ei;
+      Vertex v = g.target (e);
+      vis.examine_edge (e, g);
+      ColorValue v_color = color_map.get (v);
+      if (v_color == Color::white()) {
+        vis.tree_edge (e, g);
+        stack.push (Info(u, std::make_pair(++ei, ei_end)));
+        u = v;
+        color_map.put (u, Color::gray());
+        vis.discover_vertex (u, g);
+        std::tr1::tie (ei, ei_end) = g.out_edges (u);
+      }
+      else if (v_color == Color::gray()) {
+        vis.back_edge (e, g);
+        ++ei;
+      }
+      else {
+        vis.forward_or_cross_edge (e, g);
+        ++ei;
+      }
+    } // end while
+    color_map.put (u, Color::black());
+    vis.finish_vertex (u, g);
+  } // end while
+}
+
+
+} // namespace impl
+
+
+/// Depth First Search Algorithm (Cormen, Leiserson, and Rivest)
+///
+/// @tparam Graph the graph type
+/// @tparam DFSVisitor the visitor used uring the visit. This class must match
+///  the dfs_visitor interface
+/// @tparam ColorMap the map that associates a vertex to a color. As default
+///  is used the external color map, that mantain an hash-table from vertex to
+///  colors. If in the vertices data is present a field named color maybe you
+///  want use an user-define map
+/// 
+/// @param g the graph
+/// @param vis the visitor used (a copy). This class must match the dfs_visitor 
+///  interface. If you want to use a reference to a visitor use std::ref 
+///  utility function.
+/// @param color the color map, that associate a vertex to a color. This class
+///  must match a property_map interface that associate a vertex descriptor with
+///  a color (for example default_color_t).
+/// @param s the start vertex. After the vertex coloring the visit start with
+///  this vertex.
+template <typename Graph, typename DFSVisitor, typename ColorMap>
+void depth_first_search (Graph& g, 
+                         DFSVisitor vis, 
+                         ColorMap& color_map, 
+                         typename Graph::vertex_descriptor s)
+{
+  typedef typename Graph::vertex_descriptor Vertex;
+  typedef typename ColorMap::value_type ColorValue;
+  typedef color_traits<ColorValue> Color;
+  
+  typename Graph::vertex_iterator it, end;
+  for (std::tr1::tie (it, end) = g.vertices(); it != end; ++it) {
+    color_map.put (*it, Color::white());
+    vis.initialize_vertex (*it, g);
+  }
+
+  if (s != *g.vertices().first)
+    impl::dfs_visit (g, vis, color_map, s);
+  
+  for (std::tr1::tie (it, end) = g.vertices(); it != end; ++it) {
+    s = *it;
+    ColorValue color = color_map.get (s);
+    if (color == Color::white())
+      impl::dfs_visit (g, vis, color_map, s);
+  }
+}
 
 
 } // namespace gtl

@@ -330,6 +330,12 @@ struct predecessor_recorder
     _map.put (g.target(e), g.source(e));
   }
 
+  /// Initialize the predecessor of a vertex to itself. 
+  void initialize_vertex (typename BaseVisitor::Vertex v,
+                          typename BaseVisitor::Graph&) {
+    _map.put (v, v);
+  }
+
   predecessor_recorder (PredecessorMap& map) : _map(map) {}
 
   PredecessorMap& _map;

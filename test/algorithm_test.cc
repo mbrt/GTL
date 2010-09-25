@@ -130,15 +130,21 @@ void algorithms_test ()
   PASSED;
   
   std::cout << "DFS visit\n";
-  gtl::make_dfs_visitor (gtl::record_dfs_predecessors(graph, pred_map), 
-                         gtl::record_dfs_distances(graph, dist_map));
+  gtl::depth_first_search (graph, 
+    gtl::make_dfs_visitor (gtl::record_dfs_predecessors(graph, pred_map), 
+                           gtl::record_dfs_distances(graph, dist_map),
+                           gtl::stamp_dfs_times (graph, dtime_map, ftime_map)),
+    color_map, v1);
   
-  
-  gtl::dfs_time_stamper<G> time_st (time_map, time_map);
-  
-  time_st.discover_vertex (v1, graph);
-  time_st.finish_vertex (v1, graph);
-  gtl::stamp_dfs_times (graph, time_map, time_map);
+  assert (pred_map.get(v1) == v1);
+  assert (pred_map.get(v2) == v1);
+  assert (color_map.get(v1) == Color::black());
+  assert (color_map.get(v2) == Color::black());
+  assert (color_map.get(v3) == Color::black());
+  std::cout << "v1 time: [" << dtime_map.get(v1) << ", " << ftime_map.get(v1) << "]\n";
+  std::cout << "v2 time: [" << dtime_map.get(v2) << ", " << ftime_map.get(v2) << "]\n";
+  std::cout << "v3 time: [" << dtime_map.get(v3) << ", " << ftime_map.get(v3) << "]\n";
+  PASSED;
 }
 
 
@@ -146,6 +152,6 @@ int main ()
 {
   std::cout << "ALGORITHMS TEST\n";
   algorithms_test();
-  PASSED;
+  std::cout << "All the tests are passed\n";
   return 0;
 }
