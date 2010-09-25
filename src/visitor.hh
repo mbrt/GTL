@@ -43,7 +43,7 @@ namespace gtl {
 
 /// Default BFS visitor. You can inherit from this overriding some operations
 /// called during the BFS visit.
-/// @tparam Graph the graph class
+/// @tparam _Graph the graph class
 template <typename _Graph>
 struct bfs_visitor
 {  
@@ -93,6 +93,47 @@ struct bfs_visitor
   /// (but before the out-edges of the adjacent vertices have been examined). 
   void finish_vertex (Vertex, Graph&) {};
 };
+
+/// Default DFS visitor. You can inherit from this overriding some operations
+/// called during the DFS visit.
+/// @tparam _Graph the graph class
+template <typename _Graph>
+struct dfs_visitor 
+{
+  typedef _Graph Graph;
+  typedef typename _Graph::vertex_descriptor Vertex;
+  typedef typename _Graph::edge_descriptor Edge;
+  
+  /// This is invoked on every vertex of the graph before the start of the 
+  /// graph search. 
+  void initialize_vertex (Vertex u, Graph& g) {};
+  
+  /// This is invoked on the source vertex once before the start of the search.
+  void start_vertex (Vertex u, Graph& g) {};
+
+  /// This is invoked when a vertex is encountered for the first time.
+  void discover_vertex (Vertex u, Graph& g) {};
+
+  /// This is invoked on every out-edge of each vertex after it is discovered.
+  void examine_edge (Edge e, Graph& g) {};
+
+  /// This is invoked on each edge as it becomes a member of the edges that 
+  /// form the search tree. 
+  void tree_edge (Edge e, Graph& g) {};
+  
+  /// This is invoked on the back edges in the graph.
+  void back_edge (Edge e, Graph& g) {};
+  
+  /// This is invoked on forward or cross edges in the graph. 
+  void forward_or_cross_edge (Edge e, Graph& g) {};
+  
+  /// This is invoked on vertex u after finish_vertex has been called for all
+  /// the vertices in the DFS-tree rooted at vertex u. If vertex u is a leaf in
+  /// the DFS-tree, then the finish_vertex function is called on u after all 
+  /// the out-edges of u have been examined.
+  void finish_vertex (Vertex u, Graph& g) {};
+};
+
 
 // --------------------------------- impl --------------------------------------
 namespace impl {
@@ -176,11 +217,83 @@ struct bfs_visitor_list <Graph>
   : public bfs_visitor<Graph>
 {};
 
+
+template <typename Graph, typename ... Other>
+class dfs_visitor_list;
+
+template <typename Graph>
+struct dfs_visitor_list <Graph>;
+
+
+template <typename Graph, typename V, typename ... Other>
+class dfs_visitor_list <Graph, V, Other...> 
+  : public dfs_visitor_list <Graph, Other...>
+{
+  typedef typename Graph::vertex_descriptor _Vertex;
+  typedef typename Graph::edge_descriptor _Edge;
+  typedef dfs_visitor_list <Graph, Other...> Base;
+
+  V vis;
+
+public:
+  dfs_visitor_list (const V& vis_, Other... tail)
+    : Base(tail...), vis(vis_) {}
+
+  dfs_visitor_list ()
+    : Base(), vis() {}
+  
+  void initialize_vertex (_Vertex v, Graph& g) {
+    vis.initialize_vertex (v, g);
+    Base::initialize_vertex (v, g);
+  }
+
+  void start_vertex (_Vertex v, Graph& g) {
+    vis.start_vertex (v, g);
+    Base::start_vertex (v, g);
+  }
+  
+  void discover_vertex (_Vertex u, Graph& g) {
+    vis.discover_vertex (u, g);
+    Base::discover_vertex (u, g);
+  };
+
+  void examine_edge (_Edge e, Graph& g) {
+    vis.examine_edge (e, g);
+    Base::examine_edge (e, g);
+  };
+
+  void tree_edge (_Edge e, Graph& g) {
+    vis.tree_edge (e, g);
+    Base::tree_edge (e, g);
+  };
+  
+  void back_edge (_Edge e, Graph& g) {
+    vis.back_edge (e, g);
+    Base::back_edge (e, g);
+  };
+  
+  void forward_or_cross_edge (_Edge e, Graph& g) {
+    vis.forward_or_cross_edge (e, g);
+    Base::forward_or_cross_edge (e, g);
+  };
+  
+  void finish_vertex (_Vertex u, Graph& g) {
+    vis.finish_vertex (u, g);
+    Base::finish_vertex (u, g);
+  };
+
+};
+
+template <typename Graph>
+struct dfs_visitor_list <Graph> 
+  : public dfs_visitor<Graph>
+{};
+
 } // namespace impl
 
 
 /// This function allows to combine visitor togheter. The visitor returned 
-/// implements the same interface of bfs_visitor. When a member function is 
+/// implements the same interface of dfs_visitor. When a member function is 
 /// called (for example ::gray_target), the same function is called for 
 /// every visitor of the list (V1::gray_target, V2::gray_target ..). Internally
 /// this visitor stores by value each visitor given. 
@@ -190,6 +303,19 @@ make_bfs_visitor (V1 v, Other... other)
 {
   return impl::bfs_visitor_list<typename V1::Graph, V1, Other...> (v, other...);
 }
+
+/// This function allows to combine visitor togheter. The visitor returned 
+/// implements the same interface of bfs_visitor. When a member function is 
+/// called (for example ::tree_edge), the same function is called for 
+/// every visitor of the list (V1::tree_edge, V2::tree_edge ..). Internally
+/// this visitor stores by value each visitor given. 
+template <typename V1, typename ... Other>
+inline impl::dfs_visitor_list<typename V1::Graph, V1, Other...>
+make_dfs_visitor (V1 v, Other... other)
+{
+  return impl::dfs_visitor_list<typename V1::Graph, V1, Other...> (v, other...);
+}
+
 
 template <typename BaseVisitor,
           typename PredecessorMap = 

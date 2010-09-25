@@ -93,17 +93,20 @@ void algorithms_test ()
   Vertex v3 = graph.add_vertex (3);
   graph.add_edge (v1, v2, 1);
   graph.add_edge (v2, v1, 2);
+  
   my_bfs_visitor my_v;
   printer_bfs_visitor printer_v;
   gtl::property_map_internal_t<Vertex, gtl::default_color_t> 
     color_map (&vertex_val::color);
   gtl::property_map_external_t<Vertex, Vertex> pred_map;
   gtl::property_map_external_t<Vertex, size_t> dist_map;
+  
   gtl::breadth_first_search (graph, v1, 
     gtl::make_bfs_visitor (my_v, printer_v, 
       gtl::record_bfs_predecessors(graph, pred_map),
       gtl::record_bfs_distances(graph, dist_map)),
     color_map);
+  
   assert (color_map.get(v1) == Color::black());
   assert (color_map.get(v2) == Color::black());
   assert (color_map.get(v3) == Color::white());
@@ -113,10 +116,14 @@ void algorithms_test ()
   assert (dist_map.get(v3) == std::numeric_limits<size_t>::max());
   PASSED;
   
+  std::cout << "Color map internal\n";
   gtl::default_color_t vertex_val::*pointer;
   pointer = &vertex_val::color;
   (*v1).*pointer = Color::green();
   assert (v1->color == Color::green());
+  PASSED;
+  
+  gtl::make_dfs_visitor (gtl::dfs_visitor<G>(), gtl::dfs_visitor<G>());
 }
 
 
