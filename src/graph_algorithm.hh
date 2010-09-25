@@ -314,6 +314,68 @@ void depth_first_search (Graph& g,
   }
 }
 
+/// Depth First Search Algorithm (Cormen, Leiserson, and Rivest).
+/// This version use as start vertex the first in the vertices list.
+///
+/// @tparam Graph the graph type
+/// @tparam DFSVisitor the visitor used uring the visit. This class must match
+///  the dfs_visitor interface
+/// @tparam ColorMap the map that associates a vertex to a color. As default
+///  is used the external color map, that mantain an hash-table from vertex to
+///  colors. If in the vertices data is present a field named color maybe you
+///  want use an user-define map
+/// 
+/// @param g the graph
+/// @param vis the visitor used (a copy). This class must match the dfs_visitor 
+///  interface. If you want to use a reference to a visitor use std::ref 
+///  utility function.
+/// @param color the color map, that associate a vertex to a color. This class
+///  must match a property_map interface that associate a vertex descriptor with
+///  a color (for example default_color_t).
+template <typename Graph, typename DFSVisitor, typename ColorMap>
+inline void depth_first_search (Graph& g, DFSVisitor vis, ColorMap& color_map)
+{
+  return depth_first_search (g, vis, color_map, 
+                             *g.vertices().first);
+}
+
+/// Depth First Search Algorithm (Cormen, Leiserson, and Rivest).
+/// This version use as start vertex the first in the vertices list and the 
+/// property_map_external_t for vertex coloring.
+///
+/// @tparam Graph the graph type
+/// @tparam DFSVisitor the visitor used uring the visit. This class must match
+///  the dfs_visitor interface
+/// 
+/// @param g the graph
+/// @param vis the visitor used (a copy). This class must match the dfs_visitor 
+///  interface. If you want to use a reference to a visitor use std::ref 
+///  utility function.
+template <typename Graph, typename DFSVisitor>
+inline void depth_first_search (Graph& g, DFSVisitor vis)
+{
+  typedef typename Graph::vertex_descriptor Vertex;
+  property_map_external_t<Vertex, default_color_t> cmap;
+  return depth_first_search (g, vis, cmap, 
+                             *g.vertices().first);
+}
+
+/// Depth First Search Algorithm (Cormen, Leiserson, and Rivest).
+/// This version use as start vertex the first in the vertices list, the 
+/// property_map_external_t for vertex coloring and the dfs_visitor that 
+/// performs no operations during the visit.
+///
+/// @tparam Graph the graph type
+/// @param g the graph
+template <typename Graph>
+inline void depth_first_search (Graph& g)
+{
+  typedef typename Graph::vertex_descriptor Vertex;
+  property_map_external_t<Vertex, default_color_t> cmap;
+  dfs_visitor<Graph> vis;
+  return depth_first_search (g, vis, cmap, 
+                             *g.vertices().first);
+}
 
 } // namespace gtl
 

@@ -134,7 +134,7 @@ void algorithms_test ()
     gtl::make_dfs_visitor (gtl::record_dfs_predecessors(graph, pred_map), 
                            gtl::record_dfs_distances(graph, dist_map),
                            gtl::stamp_dfs_times (graph, dtime_map, ftime_map)),
-    color_map, v1);
+    color_map);
   
   assert (pred_map.get(v1) == v1);
   assert (pred_map.get(v2) == v1);
