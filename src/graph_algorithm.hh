@@ -302,11 +302,12 @@ void depth_first_search (Graph& g,
     color_map.put (*it, Color::white());
     vis.initialize_vertex (*it, g);
   }
-
-  if (s != *g.vertices().first)
+  
+  std::tr1::tie (it, end) = g.vertices();
+  if (s != *it)
     impl::dfs_visit (g, vis, color_map, s);
   
-  for (std::tr1::tie (it, end) = g.vertices(); it != end; ++it) {
+  for (; it != end; ++it) {
     s = *it;
     ColorValue color = color_map.get (s);
     if (color == Color::white())

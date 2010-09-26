@@ -33,7 +33,10 @@
 
 #include <cassert>
 #include <iostream>
+#include <iterator>
+#include <boost/foreach.hpp>
 
+#define foreach BOOST_FOREACH
 #define PASSED std::cout << "passed\n"
 
 struct vertex_val {
@@ -147,11 +150,59 @@ void algorithms_test ()
   PASSED;
 }
 
+template <typename OutputIter, typename Graph>
+struct topo_sort_visitor : public gtl::dfs_visitor<Graph>
+{
+  void back_edge (typename Graph::edge_descriptor, Graph&) {
+    assert (false && "Not a DAG!");
+  }
+  
+  void finish_vertex (typename Graph::vertex_descriptor v, Graph&) {
+    *it++ = v;
+  }
+  
+  topo_sort_visitor (OutputIter it_) : it(it_) {}
+  
+  OutputIter it;
+};
+
+
+void topo_sort () {
+  typedef gtl::graph_t<vertex_val, gtl::no_data, false> G;
+  typedef G::vertex_descriptor Vertex;
+  G graph;
+  
+  Vertex v1 = graph.add_vertex (1);
+  Vertex v2 = graph.add_vertex (2);
+  Vertex v3 = graph.add_vertex (3);
+  Vertex v4 = graph.add_vertex (4);
+  
+  graph.add_edge (v1, v2);
+  graph.add_edge (v1, v3);
+  graph.add_edge (v1, v4);
+  graph.add_edge (v4, v2);
+  
+  std::deque<Vertex> output_sort;
+  typedef std::front_insert_iterator<std::deque<Vertex> > inserter;
+  topo_sort_visitor<inserter, G> vis (std::front_inserter(output_sort));
+  gtl::property_map_internal_t<Vertex, gtl::default_color_t> 
+    color_map (&vertex_val::color);
+  gtl::depth_first_search (graph, vis, color_map);
+  
+  foreach (Vertex v, output_sort) {
+    std::cout << v->id << " ";
+  }
+  std::cout << std::endl;
+  PASSED;
+}
+
 
 int main ()
 {
   std::cout << "ALGORITHMS TEST\n";
   algorithms_test();
+  std::cout << "TOPO SORT\n";
+  topo_sort();
   std::cout << "All the tests are passed\n";
   return 0;
 }
