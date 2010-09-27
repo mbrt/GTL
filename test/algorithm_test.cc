@@ -150,22 +150,6 @@ void algorithms_test ()
   PASSED;
 }
 
-template <typename OutputIter, typename Graph>
-struct topo_sort_visitor : public gtl::dfs_visitor<Graph>
-{
-  void back_edge (typename Graph::edge_descriptor, Graph&) {
-    assert (false && "Not a DAG!");
-  }
-  
-  void finish_vertex (typename Graph::vertex_descriptor v, Graph&) {
-    *it++ = v;
-  }
-  
-  topo_sort_visitor (OutputIter it_) : it(it_) {}
-  
-  OutputIter it;
-};
-
 
 void topo_sort () {
   typedef gtl::graph_t<vertex_val, gtl::no_data, false> G;
@@ -183,11 +167,9 @@ void topo_sort () {
   graph.add_edge (v4, v2);
   
   std::deque<Vertex> output_sort;
-  typedef std::front_insert_iterator<std::deque<Vertex> > inserter;
-  topo_sort_visitor<inserter, G> vis (std::front_inserter(output_sort));
   gtl::property_map_internal_t<Vertex, gtl::default_color_t> 
     color_map (&vertex_val::color);
-  gtl::depth_first_search (graph, vis, color_map);
+  gtl::topological_sort (graph, std::front_inserter(output_sort), color_map);
   
   foreach (Vertex v, output_sort) {
     std::cout << v->id << " ";
@@ -201,7 +183,7 @@ int main ()
 {
   std::cout << "ALGORITHMS TEST\n";
   algorithms_test();
-  std::cout << "TOPO SORT\n";
+  std::cout << "topo sort\n";
   topo_sort();
   std::cout << "All the tests are passed\n";
   return 0;

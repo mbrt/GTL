@@ -35,6 +35,7 @@
 #include <queue>
 #include <limits>
 #include <stack>
+#include <exception>
 
 #include "property_map.hh"
 #include "visitor.hh"
@@ -377,6 +378,91 @@ inline void depth_first_search (Graph& g)
   return depth_first_search (g, vis, cmap, 
                              *g.vertices().first);
 }
+
+/// The standard graph exception
+class graph_exception : public std::exception { };
+
+/// This exception is trowed when the given graph is not a DAG (Direct Aciclic
+/// Graph).
+class not_a_dag_exception : public graph_exception { };
+
+
+template <typename OutputIter, typename Graph>
+struct topo_sort_visitor : public dfs_visitor<Graph>
+{
+  void back_edge (typename Graph::edge_descriptor, Graph&) {
+    throw not_a_dag_exception();
+  }
+  
+  void finish_vertex (typename Graph::vertex_descriptor v, Graph&) {
+    *it++ = v;
+  }
+  
+  topo_sort_visitor (OutputIter it_) : it(it_) {}
+  
+  OutputIter it;
+};
+
+/// Topological Sort
+///
+/// The topological sort algorithm creates a linear ordering of the vertices 
+/// such that if edge (u,v) appears in the graph, then u comes before v in the
+/// ordering. The graph must be a directed acyclic graph (DAG). The 
+/// implementation consists mainly of a call to depth-first search.
+///
+/// @tparam Graph the graph type
+/// @tparam OutputIterator the type of the output iterator used to store the 
+///  reverse topological order (must model Output Iterator)
+/// @tparam ColorMap the map that associates a vertex to a color. As default
+///  is used the external color map, that mantain an hash-table from vertex to
+///  colors. If in the vertices data is present a field named color maybe you
+///  want use an user-define map
+/// 
+/// @param g the graph
+/// @param iter the vertex descriptors of the graph will be output to the 
+///  result output iterator in reverse topological order. The iterator type 
+///  must model Output Iterator.
+/// @param iter the output iterator where the vertex descriptors are putted 
+/// (in reverse order).
+/// @param color the color map, that associate a vertex to a color. This class
+///  must match a property_map interface that associate a vertex descriptor with
+///  a color (for example default_color_t).
+template <typename Graph, typename OutputIterator, typename ColorMap>
+inline 
+void topological_sort (Graph& g, OutputIterator iter, ColorMap& color_map)
+{
+  ::gtl::depth_first_search (
+    g, topo_sort_visitor<OutputIterator, Graph>(iter), color_map);
+}
+
+/// Topological Sort
+///
+/// The topological sort algorithm creates a linear ordering of the vertices 
+/// such that if edge (u,v) appears in the graph, then u comes before v in the
+/// ordering. The graph must be a directed acyclic graph (DAG). The 
+/// implementation consists mainly of a call to depth-first search.
+/// This version use the property_map_external_t for vertex coloring.
+///
+/// @tparam Graph the graph type
+/// @tparam OutputIterator the type of the output iterator used to store the 
+///  reverse topological order (must model Output Iterator)
+/// 
+/// @param g the graph
+/// @param iter the vertex descriptors of the graph will be output to the 
+///  result output iterator in reverse topological order. The iterator type 
+///  must model Output Iterator.
+/// @param iter the output iterator where the vertex descriptors are putted 
+/// (in reverse order).
+template <typename Graph, typename OutputIterator>
+inline void topological_sort (Graph& g, OutputIterator iter)
+{
+  typedef typename Graph::vertex_descriptor Vertex;
+  property_map_external_t<Vertex, default_color_t> color_map;
+  ::gtl::depth_first_search (
+    g, topo_sort_visitor<OutputIterator, Graph>(iter), color_map);
+}
+
+
 
 } // namespace gtl
 

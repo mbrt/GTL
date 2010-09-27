@@ -21,6 +21,7 @@ library, you don't have to install the boost library to use it.
 
 To make and run the tests:
 
+> mkdir build
 > cd build
 > cmake -C ..
 > make
