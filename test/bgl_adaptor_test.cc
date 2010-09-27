@@ -34,6 +34,8 @@
 
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/topological_sort.hpp>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <boost/foreach.hpp>
 #include <iostream>
 #include <map>
 #include <cassert>
@@ -41,6 +43,7 @@
 #include <deque>
 
 #define PASSED std::cout << "passed\n"
+#define foreach BOOST_FOREACH
 
 
 struct vertex_val {
@@ -119,13 +122,76 @@ void bgl_topo_sort_test()
   for (std::deque<Vertex>::iterator it = topo_order.begin();
        it != topo_order.end(); ++it, ++n)
     std::cout << n << ": " << **it << std::endl;
+  PASSED;
+}
+
+struct dijkstra_edge
+{
+  int id;
+  int weight;
+  
+  dijkstra_edge (int id, int w) : id(id), weight(w) {}
+};
+
+struct dijkstra_vertex
+{
+  int id;
+  int distance;
+  gtl::default_color_t color;
+  
+  dijkstra_vertex (int id) : id(id) {}
+};
+
+
+void bgl_dijkstra_test ()
+{
+  typedef gtl::graph_t<dijkstra_vertex, dijkstra_edge> G;
+  typedef G::vertex_descriptor Vertex;
+  typedef G::edge_descriptor Edge;
+  G graph;
+  
+  std::vector<Vertex> vert(4);
+  vert[0] = graph.add_vertex (dijkstra_vertex(0));
+  vert[1] = graph.add_vertex (dijkstra_vertex(1));
+  vert[2] = graph.add_vertex (dijkstra_vertex(2));
+  vert[3] = graph.add_vertex (dijkstra_vertex(3));
+  
+  graph.add_edge (vert[0], vert[1], dijkstra_edge(0, 3));
+  graph.add_edge (vert[0], vert[2], dijkstra_edge(1, 2));
+  graph.add_edge (vert[1], vert[3], dijkstra_edge(2, 2));
+  graph.add_edge (vert[2], vert[3], dijkstra_edge(3, 1));
+  graph.add_edge (vert[1], vert[2], dijkstra_edge(4, 5));
+  
+  gtl::property_map_internal_t<Edge, int> weight(&dijkstra_edge::weight);
+  gtl::property_map_internal_t<Vertex, int> index(&dijkstra_vertex::id);
+  gtl::property_map_external_t<Vertex, Vertex> predecessor;
+  gtl::property_map_internal_t<Vertex, int> distance(&dijkstra_vertex::distance);
+  gtl::property_map_internal_t<Vertex, gtl::default_color_t> 
+    color(&dijkstra_vertex::color);
+
+  boost::dijkstra_shortest_paths (graph, vert[0], 
+    boost::weight_map(boost::make_gtl_map_adaptor(weight)).
+    vertex_index_map(boost::make_gtl_map_adaptor(index)).
+    predecessor_map(boost::make_gtl_map_adaptor(predecessor)).
+    distance_map(boost::make_gtl_map_adaptor(distance)).
+    color_map(boost::make_gtl_map_adaptor(color)));
+  
+  foreach (Vertex v, graph.vertices())
+    std::cout << "Vertex " << v->id 
+      << ") distance: " << v->distance
+      << ", predecessor: " << predecessor[v]->id << std::endl;
+  PASSED;
 }
 
 
 int main()
 {
+  std::cout << "BGL adaptor test\n";
   bgl_adaptor_test ();
+  std::cout << "Topological sort\n";
   bgl_topo_sort_test ();
+  std::cout << "Dijkstra shortest paths\n";
+  bgl_dijkstra_test ();
   std::cout << "All the tests are passed!\n";
   
 }
