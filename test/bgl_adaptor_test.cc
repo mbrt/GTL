@@ -42,6 +42,9 @@
 #include <vector>
 #include <deque>
 
+// #include <boost/graph/adjacency_list.hpp>
+// #include <boost/graph/filtered_graph.hpp>
+
 #define PASSED std::cout << "passed\n"
 #define foreach BOOST_FOREACH
 
@@ -77,7 +80,7 @@ void bgl_adaptor_test ()
   
   std::map <Vertex, int> col_map;
   boost::vertices (graph);
-  ::boost::breadth_first_search(graph, v, 
+  boost::breadth_first_search(graph, v, 
     boost::color_map(boost::associative_property_map<std::map<Vertex, int> >(col_map)));
   
   boost::remove_edge (e, graph);
@@ -183,6 +186,174 @@ void bgl_dijkstra_test ()
   PASSED;
 }
 
+// struct flow_edge
+// {
+//   int id;
+//   int flow;
+//   int cost;
+//   int capacity;
+//   int reduced_cost;
+// 
+//   flow_edge() {};
+//   flow_edge(int id, int cost, int capacity) 
+//     : id(id), flow(0), cost(cost), capacity(capacity), reduced_cost(0) {};
+// };
+// 
+// struct flow_vertex
+// {
+//   int id;
+//   int need;
+//   int potential;
+//   int color;
+// 
+//   flow_vertex() {};
+//   flow_vertex(int id, int need) : id(id), need(need), potential(0) {};
+// };
+// 
+// template <typename Graph>
+// struct flow_edge_filter
+// {
+//   const Graph* g;
+// 
+//   flow_edge_filter (const Graph& g) : g(&g) {};
+//   flow_edge_filter () : g(NULL) {};
+// 
+//   template <typename Edge>
+//   bool operator() (Edge e) const {
+//     return (*g)[e].flow < (*g)[e].capacity && (*g)[e].reduced_cost == 0;
+//   }
+// };
+// 
+// template <typename Graph, typename PredecessorMap>
+// class flow_visitor
+//   : public boost::base_visitor<flow_visitor<Graph, PredecessorMap> >
+// {
+//   typedef typename Graph::vertex_descriptor Vertex;
+//   typedef typename Graph::edge_descriptor Edge;
+// 
+// public:
+//   flow_visitor (PredecessorMap& pred, Vertex& target, bool& reached) 
+//     : pred(pred), target(target), reached(reached) {};
+//   
+//   void tree_edge (Edge e, Graph& g) {
+//     Vertex t = boost::target(e, g);
+//     boost::put (pred, t, e);
+//     if (g[t].need > 0) {
+//       reached = true;
+//       target = t;
+//     }
+//   }
+//  
+//   PredecessorMap& pred;
+//   Vertex& target;
+//   bool& reached;
+// };
+// 
+// void minimum_cost_maximum_flow_test ()
+// {
+//   typedef boost::adjacency_list<boost::vecS, boost::vecS, 
+//                                 boost::bidirectionalS, flow_vertex, 
+//                                 flow_edge> G;
+//   typedef G::vertex_descriptor Vertex;
+//   typedef G::edge_descriptor Edge;
+// 
+//   G graph(6);
+//   boost::add_vertex (flow_vertex(0, -7), graph);
+//   boost::add_vertex (flow_vertex(1, 0), graph);
+//   boost::add_vertex (flow_vertex(2, -3), graph);
+//   boost::add_vertex (flow_vertex(3, 6), graph);
+//   boost::add_vertex (flow_vertex(4, 0), graph);
+//   boost::add_vertex (flow_vertex(5, 4), graph);
+// 
+//   boost::add_edge (boost::vertex(0, graph), 
+//                    boost::vertex(1, graph), 
+//                    flow_edge(0, 5, 8), graph);
+//   boost::add_edge (boost::vertex(0, graph), 
+//                    boost::vertex(2, graph), 
+//                    flow_edge(1, 3, 6), graph);
+//   boost::add_edge (boost::vertex(1, graph), 
+//                    boost::vertex(2, graph), 
+//                    flow_edge(2, 6, 5), graph);
+//   boost::add_edge (boost::vertex(2, graph),
+//                    boost::vertex(3, graph), 
+//                    flow_edge(3, 1, 6), graph);
+//   boost::add_edge (boost::vertex(2, graph), 
+//                    boost::vertex(4, graph), 
+//                    flow_edge(4, 4, 7), graph);
+//   boost::add_edge (boost::vertex(4, graph), 
+//                    boost::vertex(1, graph), 
+//                    flow_edge(5, 1, 4), graph);
+//   boost::add_edge (boost::vertex(3, graph), 
+//                    boost::vertex(5, graph),
+//                    flow_edge(6, 2, 3), graph);
+//   boost::add_edge (boost::vertex(4, graph), 
+//                    boost::vertex(5, graph), 
+//                    flow_edge(7, 12, 5), graph);
+//   
+//   foreach (Edge e, boost::edges(graph)) {
+//     graph[e].reduced_cost = graph[e].cost;
+//     graph[e].flow = 0;
+//   }
+// 
+//   std::deque<Vertex> sources;
+//   foreach (Vertex v, boost::vertices(graph)) {
+//     if (graph[v].need < 0)
+//       sources.push_back(v);
+//   }
+// 
+//   boost::filtered_graph<G, flow_edge_filter<G> > 
+//     filtered_g (graph, flow_edge_filter<G>(graph));
+//   typedef std::vector<Edge> pmap_t;
+//   pmap_t predecessor;
+//   
+//   bool finded = false;
+//   Vertex target;
+//   std::deque<Edge> cut_edges;
+//   while (!sources.empty()) {
+//     do {
+//       finded = false;
+//       boost::breadth_first_search (filtered_g, sources.front(), 
+//         boost::color_map(get (&flow_vertex::color, graph)).
+//         visitor(boost::make_bfs_visitor(
+//           flow_visitor<G, pmap_t>(predecessor, target, finded))));
+//       if (finded) {
+//         std::cout << "Found\n";
+//         int max_increase = -graph[target].need;
+//         for (Edge e = predecessor[target]; 
+//              source(e, graph) != sources.front();
+//              e = predecessor[source(e, graph)])
+//         {
+//           int residual = graph[e].capacity - graph[e].flow;
+//           max_increase = std::min (max_increase, residual);
+//           cut_edges.push_back(e);
+//         }
+//         foreach (Edge e, cut_edges)
+//           graph[e].flow += max_increase;
+//         cut_edges.clear();
+//         if (max_increase == sources.front())
+//           sources.pop_front();
+//       }
+//       else {
+//         std::cout << "Not found\n";
+//         int max_increase = std::numeric_limits<int>::max();
+//         foreach (Edge e, boost::edges(graph))
+//           if (graph[boost::source(e, graph)].color !=
+//               graph[boost::target(e, graph)].color) {
+//             cut_edges.push_back (e);
+//             if (graph[e].flow == 0)
+//               max_increase = std::min (max_increase, graph[e].reduced_cost);
+//           }
+//         assert (max_increase < std::numeric_limits<int>::max());
+//         foreach (Edge e, cut_edges)
+//           graph[e].reduced_cost -= max_increase;
+//         cut_edges.clear();
+//         finded = false;
+//       }
+//     } while (finded);
+//   }
+//   
+// }
+
 
 int main()
 {
@@ -192,6 +363,9 @@ int main()
   bgl_topo_sort_test ();
   std::cout << "Dijkstra shortest paths\n";
   bgl_dijkstra_test ();
+//  std::cout << "Minimum-cost maximum-flow\n";
+//  minimum_cost_maximum_flow_test ();
   std::cout << "All the tests are passed!\n";
   
+  return EXIT_SUCCESS;
 }
