@@ -32,7 +32,7 @@
 #define BGL_ADAPTOR_HH
 
 #include <boost/graph/graph_traits.hpp>
-#include <boost/property_map.hpp>
+#include <boost/property_map/property_map.hpp>
 #include <boost/graph/properties.hpp>
 #include <utility>
 

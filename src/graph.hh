@@ -37,14 +37,13 @@
 #include <cassert>
 #include <algorithm>
 #include <deque>
-#include <tr1/tuple>
 
 namespace gtl
 {
 
 ///
 /// @brief Graph class with directed and parallel edges.
-/// @author Michele Bertasi, Giuseppe Di Guglielmo.
+/// @author Michele Bertasi.
 ///
 /// The graph.hh library for c++ provides an STL-like container for graphs, 
 /// templated over the data stored at the vertices and the edges. Various types 
@@ -148,16 +147,16 @@ public:
   vertex_descriptor target (edge_descriptor e);
 
   /// Returns the number of edges leaving vertex u.
-  size_t out_degree (vertex_descriptor u) const;
+  std::size_t out_degree (vertex_descriptor u) const;
 
   /// Returns the number of edges entering vertex u.
-  size_t in_degree (vertex_descriptor u) const;
+  std::size_t in_degree (vertex_descriptor u) const;
 
   /// Returns the number of vertices in the graph.
-  size_t num_vertices () const;
+  std::size_t num_vertices () const;
 
   /// Returns the number of edges in the graph.
-  size_t num_edges () const;
+  std::size_t num_edges () const;
 
   /// Returns a pair, where pair::first is the edge connecting vertex u to 
   /// vertex v. If there are more than one edge between u and v, is one of 
@@ -201,7 +200,7 @@ public:
   /// already in the graph, then a duplicate will not be added and the bool
   /// flag will be false. When the flag is false, the edge descriptor is 
   /// invalid, and any use of it is undefined. Builds the edge data with 
-  /// default constructor. The complexity is O(log(out(u)) + log(in(v))), where  
+  /// default constructor. The complexity is O(log(out(u)) + log(in(v))), where
   /// out(u) is the number of out edges of u and in(v) is the number of in 
   /// edges of v.
   /// @param u the source of the edge to be added
@@ -242,7 +241,7 @@ public:
   /// @param u the source vertex
   /// @param v the target vertex
   /// @return the number of removed edges
-  size_t remove_edge (vertex_descriptor u, vertex_descriptor v);
+  std::size_t remove_edge (vertex_descriptor u, vertex_descriptor v);
   
   /// Removes all edges from the graph that satisfy the predicate. That is
   /// if the predicate returns true when applied to an edge_descriptor, then
@@ -368,10 +367,10 @@ private:
   void remove_in_edge (edge_descriptor e);
   
   /// Remove the all the out edges with the same target of e
-  size_t remove_all_out_edges (edge_descriptor e);
+  std::size_t remove_all_out_edges (edge_descriptor e);
   
   /// Remove the all the in edges with the same source of e
-  size_t remove_all_in_edges (edge_descriptor e);
+  std::size_t remove_all_in_edges (edge_descriptor e);
   
   /// The out edge  set
   out_edge_list_type _out_edges;
@@ -459,9 +458,8 @@ std::pair<typename graph_t<Vdata, Edata, parallel, Allocator>::vertex_iterator,
           typename graph_t<Vdata, Edata, parallel, Allocator>::vertex_iterator> 
 inline graph_t<Vdata, Edata, parallel, Allocator>::vertices ()
 {
-  return std::make_pair<vertex_iterator, vertex_iterator>
-            (vertex_iterator(_vertices.begin()),
-             vertex_iterator(_vertices.end()));
+  return std::make_pair (vertex_iterator(_vertices.begin()),
+                         vertex_iterator(_vertices.end()));
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
@@ -469,9 +467,8 @@ std::pair<typename graph_t<Vdata, Edata, parallel, Allocator>::edge_iterator,
           typename graph_t<Vdata, Edata, parallel, Allocator>::edge_iterator> 
 inline graph_t<Vdata, Edata, parallel, Allocator>::edges ()
 {
-  return std::make_pair<edge_iterator, edge_iterator>
-            (edge_iterator(_edges.begin()),
-             edge_iterator(_edges.end()));
+  return std::make_pair (edge_iterator(_edges.begin()),
+                         edge_iterator(_edges.end()));
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
@@ -482,8 +479,8 @@ graph_t<Vdata, Edata, parallel, Allocator>::
 out_edges (vertex_descriptor v)
 {
   vertex_t* vertex = v.internal_value();
-  return std::make_pair<out_edge_iterator, out_edge_iterator>
-    (vertex->_out_edges.begin(), vertex->_out_edges.end());
+  return std::make_pair (vertex->_out_edges.begin(), 
+                         vertex->_out_edges.end());
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
@@ -494,8 +491,7 @@ graph_t<Vdata, Edata, parallel, Allocator>::
 in_edges (vertex_descriptor v)
 {
   vertex_t* vertex = v.internal_value();
-  return std::make_pair<in_edge_iterator, in_edge_iterator>
-    (vertex->_in_edges.begin(), vertex->_in_edges.end());
+  return std::make_pair (vertex->_in_edges.begin(), vertex->_in_edges.end());
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
@@ -515,7 +511,7 @@ graph_t<Vdata, Edata, parallel, Allocator>::target (edge_descriptor e)
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
-inline size_t
+inline std::size_t
 graph_t<Vdata, Edata, parallel, Allocator>::
 out_degree (vertex_descriptor u) const
 {
@@ -524,7 +520,7 @@ out_degree (vertex_descriptor u) const
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
-inline size_t
+inline std::size_t
 graph_t<Vdata, Edata, parallel, Allocator>::
 in_degree (vertex_descriptor u) const
 {
@@ -533,14 +529,14 @@ in_degree (vertex_descriptor u) const
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
-inline size_t
+inline std::size_t
 graph_t<Vdata, Edata, parallel, Allocator>::num_vertices () const
 {
   return _vertices.size();
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
-inline size_t
+inline std::size_t
 graph_t<Vdata, Edata, parallel, Allocator>::num_edges () const
 {
   return _edges.size();
@@ -629,14 +625,14 @@ add_edge (vertex_descriptor u, vertex_descriptor v, const Edata& data)
     _edge_alloc.destroy (edge);
     _edge_alloc.deallocate (edge, 1);
     _edges.pop_back();
-    return std::make_pair<edge_descriptor, bool> (edge_desc, false);
+    return std::make_pair (edge_desc, false);
   }
   // add the edge to the in edge list of the source
   vertex_t* target = v.internal_value();
   bool inserted = target->push_in_edges (edge_desc);
   assert (inserted);
   // all the work is done, return the pair
-  return std::make_pair<edge_descriptor, bool> (edge_desc, true);
+  return std::make_pair (edge_desc, true);
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
@@ -655,7 +651,7 @@ remove_edge (edge_descriptor e)
 }
 
 template <typename Vdata, typename Edata, bool parallel, typename Allocator>
-size_t 
+std::size_t 
 graph_t<Vdata, Edata, parallel, Allocator>::
 remove_edge (vertex_descriptor u, vertex_descriptor v)
 {
@@ -672,7 +668,7 @@ remove_edge (vertex_descriptor u, vertex_descriptor v)
   typedef std::deque<edge_descriptor, QAlloc> deletion_que_t;
   deletion_que_t deletion_que (equal.first, equal.second);
   source->remove_all_out_edges (_fake_edge_desc);
-  size_t ret = target->remove_all_in_edges (_fake_edge_desc);
+  std::size_t ret = target->remove_all_in_edges (_fake_edge_desc);
   for (typename deletion_que_t::iterator it = deletion_que.begin();
        it != deletion_que.end(); ++it) {
     edge_t* e = it->internal_value();
@@ -689,7 +685,7 @@ void graph_t<Vdata, Edata, parallel, Allocator>::
 remove_edge_if (Predicate predicate)
 {
   edge_iterator it, end, next;
-  std::tr1::tie (it, end) = edges();
+  gtl::tie (it, end) = edges();
   while (it != end) {
     next = it;
     ++next;
@@ -706,7 +702,7 @@ void graph_t<Vdata, Edata, parallel, Allocator>::
 remove_out_edge_if (vertex_descriptor v, Predicate predicate)
 {
   out_edge_iterator it, end, next;
-  std::tr1::tie (it, end) = out_edges (v);
+  gtl::tie (it, end) = out_edges (v);
   while (it != end) {
     next = it;
     ++next;
@@ -723,7 +719,7 @@ void graph_t<Vdata, Edata, parallel, Allocator>::
 remove_in_edge_if (vertex_descriptor v, Predicate predicate)
 {
   in_edge_iterator it, end, next;
-  std::tr1::tie (it, end) = in_edges (v);
+  gtl::tie (it, end) = in_edges (v);
   while (it != end) {
     next = it;
     ++next;
@@ -785,7 +781,7 @@ void graph_t<Vdata, Edata, parallel, Allocator>::
 remove_vertex_if (Predicate predicate)
 {
   vertex_iterator it, end, next;
-  std::tr1::tie (it, end) = vertices();
+  gtl::tie (it, end) = vertices();
   while (it != end) {
     next = it;
     ++next;
@@ -848,14 +844,14 @@ remove_in_edge (edge_descriptor edge)
 }
 
 template <typename Vdata, typename Config>
-inline size_t graph_vertex_t_<Vdata, Config>::
+inline std::size_t graph_vertex_t_<Vdata, Config>::
 remove_all_out_edges (edge_descriptor edge)
 {
   return OutEdgesAdaptor::remove (_out_edges, edge);
 }
 
 template <typename Vdata, typename Config>
-inline size_t graph_vertex_t_<Vdata, Config>::
+inline std::size_t graph_vertex_t_<Vdata, Config>::
 remove_all_in_edges (edge_descriptor edge)
 {
   return InEdgesAdaptor::remove (_in_edges, edge);

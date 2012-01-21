@@ -34,6 +34,7 @@
 #include <set>
 #include <list>
 #include <tr1/unordered_map>
+#include <cstddef>
 
 
 namespace gtl
@@ -50,8 +51,27 @@ class graph_edge_t_;
 /// An empty struct that contains no data
 struct no_data {};
 
+
 /// Used for internal graph data types and functions
 namespace impl {
+
+/// Useful if you don't have the c++11 tie function
+template <typename T1, typename T2>
+struct _tie_wrapper
+{
+  T1& t1;
+  T2& t2;
+
+  _tie_wrapper (T1& t1_, T2& t2_) 
+    : t1 (t1_), t2 (t2_) {}
+
+  _tie_wrapper& operator= (std::pair <T2, T2> p)
+  {
+    t1 = p.first;
+    t2 = p.second;
+    return *this;
+  }
+};
 
 struct unspecified;
 
@@ -159,12 +179,12 @@ struct compare_out_
 
 /// The hasher function, based on the standard hash function on integers
 template <typename Descriptor>
-struct _descriptor_hash : public std::unary_function<Descriptor, size_t>
+struct _descriptor_hash : public std::unary_function<Descriptor, std::size_t>
 {
-  std::tr1::hash<size_t> __hasher;
+  std::tr1::hash<std::size_t> __hasher;
 
-  size_t operator() (const Descriptor& x) const {
-    return __hasher (reinterpret_cast<size_t> (x.internal_value()));
+  std::size_t operator() (const Descriptor& x) const {
+    return __hasher (reinterpret_cast<std::size_t> (x.internal_value()));
   }
 };
 
@@ -411,27 +431,27 @@ struct _ContainerAdaptor
   }
 
   template <typename T, typename Cmp, typename A>
-  static size_t
+  static std::size_t
   remove (std::multiset<T, Cmp, A>& container, iterator e) {
     container.erase(e);
     return 1;
   }
   
   template <typename T, typename Cmp, typename A>
-  static size_t
+  static std::size_t
   remove (std::set<T, Cmp, A>& container, iterator e) {
     container.erase(e);
     return 1;
   }
   
   template <typename T, typename Cmp, typename A>
-  static size_t
+  static std::size_t
   remove (std::multiset<T, Cmp, A>& container, value_type e) {
     return container.erase(e);
   }
   
   template <typename T, typename Cmp, typename A>
-  static size_t
+  static std::size_t
   remove (std::set<T, Cmp, A>& container, value_type e) {
     return container.erase(e);
   }
@@ -516,6 +536,15 @@ struct _Config
 };
 
 } // namespace impl
+
+
+/// Useful if you don't have the c++11 tie function
+template <typename T1, typename T2>
+impl::_tie_wrapper <T1, T2> tie (T1& t1, T2& t2) 
+{
+  return impl::_tie_wrapper <T1, T2> (t1, t2);
+}
+
 } // namespace gtl
 
 #endif

@@ -106,32 +106,32 @@ struct dfs_visitor
   
   /// This is invoked on every vertex of the graph before the start of the 
   /// graph search. 
-  void initialize_vertex (Vertex u, Graph& g) {};
+  void initialize_vertex (Vertex , Graph& ) {};
   
   /// This is invoked on the source vertex once before the start of the search.
-  void start_vertex (Vertex u, Graph& g) {};
+  void start_vertex (Vertex , Graph& ) {};
 
   /// This is invoked when a vertex is encountered for the first time.
-  void discover_vertex (Vertex u, Graph& g) {};
+  void discover_vertex (Vertex , Graph& ) {};
 
   /// This is invoked on every out-edge of each vertex after it is discovered.
-  void examine_edge (Edge e, Graph& g) {};
+  void examine_edge (Edge , Graph& ) {};
 
   /// This is invoked on each edge as it becomes a member of the edges that 
   /// form the search tree. 
-  void tree_edge (Edge e, Graph& g) {};
+  void tree_edge (Edge , Graph& ) {};
   
   /// This is invoked on the back edges in the graph.
-  void back_edge (Edge e, Graph& g) {};
+  void back_edge (Edge , Graph& ) {};
   
   /// This is invoked on forward or cross edges in the graph. 
-  void forward_or_cross_edge (Edge e, Graph& g) {};
+  void forward_or_cross_edge (Edge , Graph& ) {};
   
   /// This is invoked on vertex u after finish_vertex has been called for all
   /// the vertices in the DFS-tree rooted at vertex u. If vertex u is a leaf in
   /// the DFS-tree, then the finish_vertex function is called on u after all 
   /// the out-edges of u have been examined.
-  void finish_vertex (Vertex u, Graph& g) {};
+  void finish_vertex (Vertex , Graph& ) {};
 };
 
 
