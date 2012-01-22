@@ -31,7 +31,6 @@
 #ifndef GTL_GRAPH_ALGORITHM_HH
 #define GTL_GRAPH_ALGORITHM_HH
 
-#include <tr1/tuple>
 #include <queue>
 #include <limits>
 #include <stack>
@@ -39,6 +38,7 @@
 
 #include "property_map.hh"
 #include "visitor.hh"
+#include "graph_internals.hh"
 
 
 namespace gtl {
@@ -83,7 +83,7 @@ breadth_first_search (Graph& g,
   typename Graph::vertex_iterator it, end;
   typename Graph::out_edge_iterator ei, ei_end;
   
-  std::tr1::tie(it, end) = g.vertices();
+  gtl::tie(it, end) = g.vertices();
   for (; it != end; ++it) {
     vis.initialize_vertex (*it, g);   // visitor
     color_map.put (*it, Color::white());
@@ -96,7 +96,7 @@ breadth_first_search (Graph& g,
     Vertex u = q.front();
     q.pop();
     vis.examine_vertex (u, g);        // visitor
-    std::tr1::tie(ei, ei_end) = g.out_edges (u);
+    gtl::tie(ei, ei_end) = g.out_edges (u);
     for (; ei != ei_end; ++ei) {
       Edge e = *ei;
       Vertex v = g.target (e);
@@ -236,7 +236,7 @@ void dfs_visit (Graph& g, DFSVisitor& vis, ColorMap& color_map,
   while (! stack.empty()) {
     Info& context = stack.top();
     u = context.vertex;
-    std::tr1::tie (ei, ei_end) = context.range;
+    gtl::tie (ei, ei_end) = context.range;
     stack.pop();
     while (ei != ei_end) {
       e = *ei;
@@ -249,7 +249,7 @@ void dfs_visit (Graph& g, DFSVisitor& vis, ColorMap& color_map,
         u = v;
         color_map.put (u, Color::gray());
         vis.discover_vertex (u, g);
-        std::tr1::tie (ei, ei_end) = g.out_edges (u);
+        gtl::tie (ei, ei_end) = g.out_edges (u);
       }
       else if (v_color == Color::gray()) {
         vis.back_edge (e, g);
@@ -299,12 +299,12 @@ void depth_first_search (Graph& g,
   typedef color_traits<ColorValue> Color;
   
   typename Graph::vertex_iterator it, end;
-  for (std::tr1::tie (it, end) = g.vertices(); it != end; ++it) {
+  for (gtl::tie (it, end) = g.vertices(); it != end; ++it) {
     color_map.put (*it, Color::white());
     vis.initialize_vertex (*it, g);
   }
   
-  std::tr1::tie (it, end) = g.vertices();
+  gtl::tie (it, end) = g.vertices();
   if (s != *it)
     impl::dfs_visit (g, vis, color_map, s);
   

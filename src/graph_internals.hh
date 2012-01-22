@@ -33,7 +33,7 @@
 
 #include <set>
 #include <list>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <cstddef>
 
 
@@ -181,7 +181,7 @@ struct compare_out_
 template <typename Descriptor>
 struct _descriptor_hash : public std::unary_function<Descriptor, std::size_t>
 {
-  std::tr1::hash<std::size_t> __hasher;
+  std::hash<std::size_t> __hasher;
 
   std::size_t operator() (const Descriptor& x) const {
     return __hasher (reinterpret_cast<std::size_t> (x.internal_value()));

@@ -128,8 +128,8 @@ namespace impl {
   };
 }
 
-/// A property map that does not do anything, for when you have to supply
-/// a property map, but don't need it.
+/// A property map that does anything, for when you have to supply
+/// a property map, but you don't need it.
 class dummy_property_map 
 {
 public:
